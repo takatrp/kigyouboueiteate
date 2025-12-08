@@ -60,7 +60,7 @@
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px 16px;
       align-items: flex-end;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .field {
       display: flex;
@@ -131,6 +131,22 @@
       background: #cbd5e1;
       box-shadow: none;
       cursor: default;
+    }
+    .confirm-row {
+      margin-bottom: 8px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+    .check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .check-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
     }
     .status {
       font-size: 0.82rem;
@@ -236,7 +252,8 @@
         border-radius: 0;
       }
       .button-row,
-      input[type="file"] {
+      input[type="file"],
+      .confirm-row {
         display: none !important;
       }
       .table-wrapper {
@@ -259,7 +276,7 @@
     </h1>
     <div class="subtitle">
       「代理店報酬明細書(詳細)」シートから、<strong>初年度第1回報酬 × 12ヶ月 × 10％</strong> を契約者ごとに集計し、
-      担当者入力付きのレポートを作成します。
+      担当者入力と目視確認付きのレポートを作成します。
     </div>
 
     <form id="controlForm" onsubmit="return false;">
@@ -284,6 +301,13 @@
       </div>
     </form>
 
+    <div class="confirm-row">
+      <label class="check-label">
+        <input type="checkbox" id="manualCheck" />
+        <span>目視確認済み</span>
+      </label>
+    </div>
+
     <div id="status" class="status"></div>
     <div id="summary" class="summary"></div>
 
@@ -307,7 +331,8 @@
       ・「代理店報酬明細書(詳細)」シートのヘッダー行に「契約者名」「成績」「入金回数」「報酬」を含む列がある前提です。<br />
       ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
       ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 10％（円未満切捨て）で計算しています。<br />
-      ・契約者ごとに小計行を表示し、その行の「担当者」欄に社内の担当者名を入力できます（印刷時も反映されます）。
+      ・契約者ごとに小計行を表示し、その行の「担当者」欄に社内の担当者名を入力できます（印刷・PDF にも反映されます）。<br />
+      ・PDF/印刷実行前には、必ず「目視確認済み」にチェックを入れてください。
     </div>
   </div>
 </div>
@@ -354,6 +379,7 @@
     const tbodyEl = document.querySelector("#resultTable tbody");
     const runBtn = document.getElementById("runBtn");
     const printBtn = document.getElementById("printBtn");
+    const manualCheck = document.getElementById("manualCheck");
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -361,6 +387,20 @@
 
     // PDF/印刷ボタン
     printBtn.addEventListener("click", () => {
+      // 集計済みかどうか（tbody に何か行があるか & 表示されているか）
+      const hasRows = tbodyEl.querySelector("tr") !== null;
+      if (!hasRows || tableWrapperEl.style.display === "none") {
+        setStatus("先に集計を実行してください。");
+        return;
+      }
+
+      // 目視確認チェック
+      if (!manualCheck.checked) {
+        setStatus("PDF/印刷を行う前に「目視確認済み」にチェックを入れてください。");
+        return;
+      }
+
+      setStatus("");
       window.print();
     });
 
@@ -373,6 +413,8 @@
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
       tableWrapperEl.style.display = "none";
+      // 新しい集計ごとに目視確認チェックをリセット
+      manualCheck.checked = false;
 
       if (!file) {
         setStatus("xlsx ファイルを選択してください。");
@@ -489,8 +531,8 @@
             headerTr.appendChild(headerTd);
             tbodyEl.appendChild(headerTr);
 
-            // 明細行
-            group.details.forEach((r, idx) => {
+            // 明細行（担当者欄は空のまま表示のみ）
+            group.details.forEach(r => {
               const tr = document.createElement("tr");
 
               const tdName = document.createElement("td");
@@ -500,7 +542,6 @@
 
               const tdTantou = document.createElement("td");
               tdTantou.className = "detail-row-cell";
-              // 明細行では担当者セルは空（小計行で入力）
               tr.appendChild(tdTantou);
 
               const tdSeiseki = document.createElement("td");
