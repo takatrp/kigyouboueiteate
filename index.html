@@ -53,6 +53,721 @@
     .subtitle {
       font-size: 0.88rem;
       color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* フロー表示 */
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+      font-size: 0.8rem;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e5f0f6;
+      color: #1f2933;
+      white-space: nowrap;
+    }
+    .flow-step .step-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #578899;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .flow-step .step-text {
+      font-weight: 500;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px 16px;
+      align-items: flex-end;
+      margin-bottom: 8px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.86rem;
+    }
+    label {
+      color: var(--muted);
+    }
+    input[type="number"],
+    input[type="file"],
+    input[type="text"] {
+      font-size: 0.9rem;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+    }
+    input[type="number"]:focus,
+    input[type="file"]:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 1px rgba(87, 136, 153, 0.25);
+      background: #ffffff;
+    }
+    .button-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+    }
+    button.primary {
+      background: var(--brand);
+      color: #ffffff;
+      box-shadow: 0 8px 20px rgba(87, 136, 153, 0.35);
+    }
+    button.primary:hover {
+      background: var(--brand-dark);
+      box-shadow: 0 10px 24px rgba(87, 136, 153, 0.42);
+    }
+    button.primary:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 16px rgba(87, 136, 153, 0.35);
+    }
+    button.secondary {
+      background: #e5e7eb;
+      color: #111827;
+      box-shadow: 0 3px 8px rgba(148, 163, 184, 0.35);
+    }
+    button.secondary:hover {
+      background: #d1d5db;
+    }
+    button.secondary:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(148, 163, 184, 0.3);
+    }
+    button:disabled {
+      background: #cbd5e1;
+      box-shadow: none;
+      cursor: default;
+    }
+    .confirm-row {
+      margin-bottom: 8px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+    .check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .check-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .status {
+      font-size: 0.82rem;
+      color: var(--muted);
+      min-height: 1.2em;
+      margin-bottom: 4px;
+    }
+    .summary {
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin: 6px 0 10px;
+    }
+    .summary span.highlight {
+      color: var(--brand-dark);
+    }
+    .table-wrapper {
+      max-height: 520px;
+      overflow: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      background: #ffffff;
+    }
+    thead tr {
+      background: #f3f4f6;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #edf0f3;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      font-weight: 600;
+      color: #374151;
+      white-space: nowrap;
+    }
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    tr:nth-child(even) td.detail-row-cell {
+      background: #f9fafb;
+    }
+    .group-header td {
+      background: var(--accent-soft);
+      font-weight: 600;
+      color: #1f2937;
+      border-bottom: 1px solid #d1d5db;
+    }
+    .group-header span.label {
+      opacity: 0.9;
+    }
+    .subtotal-row td {
+      background: var(--subtotal-bg);
+      font-weight: 600;
+      border-top: 1px solid #eab308;
+      border-bottom: 1px solid #eab308;
+    }
+    .subtotal-row td.num {
+      font-size: 0.9rem;
+    }
+    .subtotal-input {
+      max-width: 160px;
+      font-size: 0.8rem;
+    }
+    .note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      .card {
+        padding: 16px 14px 20px;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      form {
+        grid-template-columns: 1fr;
+      }
+      .table-wrapper {
+        max-height: 400px;
+      }
+      .flow-step {
+        width: 100%;
+      }
+    }
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .card {
+        box-shadow: none;
+        border-radius: 0;
+      }
+      .button-row,
+      input[type="file"],
+      .confirm-row,
+      .flow {
+        display: none !important;
+      }
+      .table-wrapper {
+        max-height: none;
+        overflow: visible;
+        border: none;
+      }
+    }
+  </style>
+
+  <!-- SheetJS (XLSX) CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="shell">
+  <div class="card">
+    <h1>
+      企業防衛推進手当 集計ツール
+      <span class="badge">代理店報酬明細書(詳細) シート対応</span>
+    </h1>
+    <div class="subtitle">
+      「代理店報酬明細書(詳細)」シートから、<strong>初年度第1回報酬 × 12ヶ月 × 10％</strong> を契約者ごとに集計し、
+      担当者入力と目視確認付きのレポートを作成します。
+    </div>
+
+    <!-- フロー表示 -->
+    <div class="flow">
+      <div class="flow-step">
+        <span class="step-no">1</span>
+        <span class="step-text">対象年月とファイルを指定</span>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">2</span>
+        <span class="step-text">「集計する」を押す</span>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">3</span>
+        <span class="step-text">内容を確認し「目視確認済み」にチェック</span>
+      </div>
+      <div class="flow-step">
+        <span class="step-no">4</span>
+        <span class="step-text">「PDF/印刷」でレポート出力</span>
+      </div>
+    </div>
+
+    <form id="controlForm" onsubmit="return false;">
+      <div class="field">
+        <label for="year">対象年（西暦）</label>
+        <input type="number" id="year" value="2025" min="2000" max="2100" />
+      </div>
+      <div class="field">
+        <label for="month">対象月</label>
+        <input type="number" id="month" value="7" min="1" max="12" />
+      </div>
+      <div class="field">
+        <label for="xlsxFile">代理店報酬明細書（.xlsx）</label>
+        <input type="file" id="xlsxFile" accept=".xlsx,.xls" />
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <div class="button-row">
+          <button id="runBtn" type="button" class="primary">STEP2 集計する</button>
+          <button id="printBtn" type="button" class="secondary">STEP4 PDF/印刷</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="confirm-row">
+      <label class="check-label">
+        <input type="checkbox" id="manualCheck" />
+        <span>STEP3 目視確認済み</span>
+      </label>
+    </div>
+
+    <div id="status" class="status"></div>
+    <div id="summary" class="summary"></div>
+
+    <div class="table-wrapper" id="tableWrapper" style="display:none;">
+      <table id="resultTable">
+        <thead>
+        <tr>
+          <th>契約者名</th>
+          <th>担当者</th>
+          <th>成績</th>
+          <th>入金回数</th>
+          <th>初年度第1回報酬（円）</th>
+          <th>企業防衛推進手当（円）</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="note">
+      ・「代理店報酬明細書(詳細)」シートのヘッダー行に「契約者名」「成績」「入金回数」「報酬」を含む列がある前提です。<br />
+      ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
+      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 10％（円未満切捨て）で計算しています。<br />
+      ・契約者ごとに小計行を表示し、その行の「担当者」欄に社内の担当者名を入力できます（印刷・PDF にも反映されます）。<br />
+      ・該当無しの場合でも、「目視確認済み」にチェックした上で PDF/印刷が可能です。
+    </div>
+  </div>
+</div>
+
+<script>
+  // 金額を数値に変換（"15,000" や "15 000" や 数値型にも対応）
+  function parseAmount(val) {
+    if (val == null) return 0;
+    if (typeof val === "number") return Math.floor(val);
+    const digits = String(val).replace(/[^\d]/g, "");
+    return digits ? parseInt(digits, 10) : 0;
+  }
+
+  // 列名を「含む」かどうかで探す（除外キーワードも指定可）
+  function findColumnKey(sampleRow, includeKeywords, excludeKeywords) {
+    const keys = Object.keys(sampleRow || {});
+    const includes = Array.isArray(includeKeywords) ? includeKeywords : [includeKeywords];
+    const excludes = Array.isArray(excludeKeywords) ? excludeKeywords : (excludeKeywords ? [excludeKeywords] : []);
+
+    for (const key of keys) {
+      if (
+        includes.every(k => key.includes(k)) &&
+        excludes.every(k => !key.includes(k))
+      ) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  // 入金回数の正規化（"1- 1" → "1-1"、全角ハイフンも半角に）
+  function normalizeNyukin(val) {
+    if (val == null) return "";
+    let s = String(val);
+    s = s.replace("－", "-");
+    s = s.replace(/\s+/g, "");
+    return s;
+  }
+
+  (function init() {
+    const statusEl = document.getElementById("status");
+    const summaryEl = document.getElementById("summary");
+    const tableWrapperEl = document.getElementById("tableWrapper");
+    const tbodyEl = document.querySelector("#resultTable tbody");
+    const runBtn = document.getElementById("runBtn");
+    const printBtn = document.getElementById("printBtn");
+    const manualCheck = document.getElementById("manualCheck");
+
+    // 集計・確認の世代管理
+    let hasAggregated = false;      // 一度でも正常に集計完了したか（件数0でも true）
+    let aggregateGen = 0;           // 集計の世代（1回成功するごとに +1）
+    let confirmedGen = 0;           // 目視確認したときの世代
+
+    function setStatus(msg) {
+      statusEl.textContent = msg || "";
+    }
+
+    // 目視確認チェックが変更されたとき
+    manualCheck.addEventListener("change", () => {
+      if (manualCheck.checked && hasAggregated) {
+        // 最新の集計結果に対する確認時刻として扱う
+        confirmedGen = aggregateGen;
+      } else {
+        confirmedGen = 0;
+      }
+    });
+
+    // PDF/印刷ボタン
+    printBtn.addEventListener("click", () => {
+      if (!hasAggregated) {
+        setStatus("先に STEP2「集計する」を実行してください。");
+        return;
+      }
+
+      if (!manualCheck.checked) {
+        setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。");
+        return;
+      }
+
+      if (confirmedGen !== aggregateGen) {
+        setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。");
+        return;
+      }
+
+      setStatus("");
+      window.print();
+    });
+
+    runBtn.addEventListener("click", () => {
+      const year = document.getElementById("year").value.trim();
+      const month = document.getElementById("month").value.trim();
+      const fileInput = document.getElementById("xlsxFile");
+      const file = fileInput.files[0];
+
+      summaryEl.textContent = "";
+      tbodyEl.innerHTML = "";
+      tableWrapperEl.style.display = "none";
+
+      if (!file) {
+        setStatus("xlsx ファイルを選択してください。");
+        return;
+      }
+      if (!year || !month) {
+        setStatus("対象年と対象月を入力してください。");
+        return;
+      }
+      const monthNum = parseInt(month, 10);
+      if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) {
+        setStatus("対象月は 1〜12 の範囲で入力してください。");
+        return;
+      }
+
+      setStatus("ファイルを読み込んでいます…");
+      runBtn.disabled = true;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          // 「代理店報酬明細書(詳細)」シートを明示的に選択
+          const targetSheetName = workbook.SheetNames.find(
+            name => name === "代理店報酬明細書(詳細)"
+          );
+
+          if (!targetSheetName) {
+            setStatus("ブック内に「代理店報酬明細書(詳細)」シートが見つかりません。シート名をご確認ください。");
+            runBtn.disabled = false;
+            return;
+          }
+
+          const sheet = workbook.Sheets[targetSheetName];
+
+          // ヘッダー行を元にオブジェクト配列に変換（空セルも defval で空文字に）
+          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+          if (!json.length) {
+            setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。");
+            runBtn.disabled = false;
+            return;
+          }
+
+          const sampleRow = json[0];
+
+          const contractKey = findColumnKey(sampleRow, "契約者名") || "契約者名";
+          const seisekiKey  = findColumnKey(sampleRow, "成績")    || "成績";
+          const nyukinKey   = findColumnKey(sampleRow, "入金回数") || "入金回数";
+          const rewardKey   =
+            findColumnKey(sampleRow, ["報酬"], ["計算用"]) ||
+            findColumnKey(sampleRow, "報酬") || "報酬";
+
+          // 条件に合致する行を抽出
+          const rows = [];
+          for (const row of json) {
+            const seiseki = String(row[seisekiKey] || "");
+            const nyukinRaw = normalizeNyukin(row[nyukinKey]);
+
+            // 成績に「初年度」を含み、入金回数が 1 または 1-1
+            if (!seiseki.includes("初年度")) continue;
+            if (!(nyukinRaw === "1" || nyukinRaw === "1-1")) continue;
+
+            const firstReward = parseAmount(row[rewardKey]);
+            const bonus = Math.floor(firstReward * 12 * 0.1); // 12ヶ月×10%（円未満切捨て）
+            const contractorName = row[contractKey] || "";
+
+            rows.push({
+              contractor: contractorName,
+              seiseki: seiseki,
+              nyukin: nyukinRaw,
+              firstReward: firstReward,
+              bonus: bonus
+            });
+          }
+
+          // 契約者ごとにグルーピング
+          let totalBonus = 0;
+          const groups = {};
+
+          rows.forEach(r => {
+            const key = r.contractor || "(契約者名なし)";
+            if (!groups[key]) {
+              groups[key] = { details: [], subtotal: 0 };
+            }
+            groups[key].details.push(r);
+            groups[key].subtotal += r.bonus;
+            totalBonus += r.bonus;
+          });
+
+          tbodyEl.innerHTML = "";
+
+          if (!rows.length) {
+            // 該当無しだが、集計は完了扱いとする
+            tableWrapperEl.style.display = "none";
+            hasAggregated = true;
+            aggregateGen += 1;
+            confirmedGen = 0;
+            setStatus("集計が完了しました（該当する初年度第1回報酬はありません）。必要に応じて STEP3「目視確認済み」にチェックのうえ、STEP4「PDF/印刷」でレポートを出力できます。");
+            summaryEl.textContent = "該当無し";
+            runBtn.disabled = false;
+            return;
+          }
+
+          // 表示用にソート（契約者名順）
+          const contractorNames = Object.keys(groups).sort((a, b) => a.localeCompare(b, "ja"));
+
+          contractorNames.forEach(contractorName => {
+            const group = groups[contractorName];
+
+            // グループヘッダー行
+            const headerTr = document.createElement("tr");
+            headerTr.className = "group-header";
+            const headerTd = document.createElement("td");
+            headerTd.colSpan = 6;
+            headerTd.innerHTML = `<span class="label">◆ 契約者：</span>${contractorName || "(契約者名なし)"}`;
+            headerTr.appendChild(headerTd);
+            tbodyEl.appendChild(headerTr);
+
+            // 明細行（担当者欄は空のまま表示のみ）
+            group.details.forEach(r => {
+              const tr = document.createElement("tr");
+
+              const tdName = document.createElement("td");
+              tdName.className = "detail-row-cell";
+              tdName.textContent = r.contractor;
+              tr.appendChild(tdName);
+
+              const tdTantou = document.createElement("td");
+              tdTantou.className = "detail-row-cell";
+              tr.appendChild(tdTantou);
+
+              const tdSeiseki = document.createElement("td");
+              tdSeiseki.className = "detail-row-cell";
+              tdSeiseki.textContent = r.seiseki;
+              tr.appendChild(tdSeiseki);
+
+              const tdNyukin = document.createElement("td");
+              tdNyukin.className = "detail-row-cell";
+              tdNyukin.textContent = r.nyukin;
+              tr.appendChild(tdNyukin);
+
+              const tdReward = document.createElement("td");
+              tdReward.className = "num detail-row-cell";
+              tdReward.textContent = r.firstReward.toLocaleString("ja-JP");
+              tr.appendChild(tdReward);
+
+              const tdBonus = document.createElement("td");
+              tdBonus.className = "num detail-row-cell";
+              tdBonus.textContent = r.bonus.toLocaleString("ja-JP");
+              tr.appendChild(tdBonus);
+
+              tbodyEl.appendChild(tr);
+            });
+
+            // 契約者ごとの小計行（担当者入力付き）
+            const subtotalTr = document.createElement("tr");
+            subtotalTr.className = "subtotal-row";
+
+            const tdSubtotalLabel = document.createElement("td");
+            tdSubtotalLabel.textContent = "契約者小計";
+            subtotalTr.appendChild(tdSubtotalLabel);
+
+            const tdTantouInput = document.createElement("td");
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = "subtotal-input";
+            input.placeholder = "担当者名を入力";
+            tdTantouInput.appendChild(input);
+            subtotalTr.appendChild(tdTantouInput);
+
+            const tdBlank1 = document.createElement("td");
+            tdBlank1.textContent = "";
+            subtotalTr.appendChild(tdBlank1);
+
+            const tdBlank2 = document.createElement("td");
+            tdBlank2.textContent = "";
+            subtotalTr.appendChild(tdBlank2);
+
+            const tdBlank3 = document.createElement("td");
+            tdBlank3.className = "num";
+            tdBlank3.textContent = "";
+            subtotalTr.appendChild(tdBlank3);
+
+            const tdSubtotalValue = document.createElement("td");
+            tdSubtotalValue.className = "num";
+            tdSubtotalValue.textContent = group.subtotal.toLocaleString("ja-JP");
+            subtotalTr.appendChild(tdSubtotalValue);
+
+            tbodyEl.appendChild(subtotalTr);
+          });
+
+          tableWrapperEl.style.display = "";
+          hasAggregated = true;
+          aggregateGen += 1;   // 新しい集計世代
+          confirmedGen = 0;    // 目視確認は無効化（再チェック必須）
+
+          setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
+
+          summaryEl.innerHTML =
+            `<span class="highlight">${year}年${monthNum}月分企業防衛推進手当 合計：</span>` +
+            `${totalBonus.toLocaleString("ja-JP")}円`;
+
+        } catch (err) {
+          console.error(err);
+          setStatus("xlsx の解析中にエラーが発生しました。ヘッダー名やシート名をご確認ください。");
+        } finally {
+          runBtn.disabled = false;
+        }
+      };
+
+      reader.onerror = () => {
+        setStatus("ファイル読み込みに失敗しました。");
+        runBtn.disabled = false;
+      };
+
+      reader.readAsArrayBuffer(file);
+    });
+  })();
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>企業防衛推進手当 集計ツール（代理店報酬明細書(詳細)）</title>
+  <style>
+    :root {
+      --brand: #578899;
+      --brand-dark: #456d77;
+      --bg: #f4f6fa;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent-soft: #e5f0f6;
+      --subtotal-bg: #fef9c3;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 16px 40px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .shell {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px 20px 24px;
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    h1 span.badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e0edf4;
+      color: var(--brand-dark);
+      font-weight: 600;
+    }
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--muted);
       margin-bottom: 16px;
     }
     form {
