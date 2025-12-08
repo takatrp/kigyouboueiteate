@@ -209,10 +209,10 @@
   <div class="card">
     <h1>
       企業防衛推進手当 集計ツール
-      <span class="badge">xlsx 代理店報酬明細書</span>
+      <span class="badge">代理店報酬明細書(詳細) シート対応</span>
     </h1>
     <div class="subtitle">
-      「代理店報酬明細書」を Excel（.xlsx）で読み込み、<strong>初年度第1回報酬 × 12ヶ月 × 10％</strong> を自動集計します。
+      「代理店報酬明細書(詳細)」シートを持つ Excel（.xlsx）ファイルから、<strong>初年度第1回報酬 × 12ヶ月 × 10％</strong> を自動集計します。
     </div>
 
     <form id="controlForm" onsubmit="return false;">
@@ -253,9 +253,9 @@
     </div>
 
     <div class="note">
+      ・「代理店報酬明細書(詳細)」シートのヘッダー行に「契約者名」「成績」「入金回数」「報酬」を含む列がある前提です。<br />
       ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
-      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 10％（円未満切捨て）で計算しています。<br />
-      ・ヘッダー行に「契約者名」「成績」「入金回数」「報酬」を含む列がある前提です（多少異なる場合も「含む」判定で拾います）。
+      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 10％（円未満切捨て）で計算しています。
     </div>
   </div>
 </div>
@@ -339,14 +339,25 @@
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          const sheetName = workbook.SheetNames[0];
-          const sheet = workbook.Sheets[sheetName];
+          // ★ 「代理店報酬明細書(詳細)」シートを明示的に選択
+          const targetSheetName = workbook.SheetNames.find(
+            name => name === "代理店報酬明細書(詳細)"
+          );
+
+          if (!targetSheetName) {
+            setStatus("ブック内に「代理店報酬明細書(詳細)」シートが見つかりません。シート名をご確認ください。");
+            runBtn.disabled = false;
+            return;
+          }
+
+          const sheet = workbook.Sheets[targetSheetName];
 
           // ヘッダー行を元にオブジェクト配列に変換（空セルも defval で空文字に）
           const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
           if (!json.length) {
-            setStatus("シート内にデータがありません。");
+            setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。");
+            runBtn.disabled = false;
             return;
           }
 
@@ -383,6 +394,7 @@
           if (!rows.length) {
             setStatus("");
             summaryEl.textContent = "該当無し";
+            runBtn.disabled = false;
             return;
           }
 
@@ -427,7 +439,7 @@
 
         } catch (err) {
           console.error(err);
-          setStatus("xlsx の解析中にエラーが発生しました。ヘッダー名や形式をご確認ください。");
+          setStatus("xlsx の解析中にエラーが発生しました。ヘッダー名やシート名をご確認ください。");
         } finally {
           runBtn.disabled = false;
         }
