@@ -381,22 +381,42 @@
     const printBtn = document.getElementById("printBtn");
     const manualCheck = document.getElementById("manualCheck");
 
+    // 集計・確認の世代管理
+    let hasAggregated = false;      // 一度でも正常に集計完了したか
+    let aggregateGen = 0;           // 集計の世代（1回成功するごとに +1）
+    let confirmedGen = 0;           // 目視確認したときの世代
+
     function setStatus(msg) {
       statusEl.textContent = msg || "";
     }
 
+    // 目視確認チェックが変更されたとき
+    manualCheck.addEventListener("change", () => {
+      if (manualCheck.checked && hasAggregated) {
+        // 最新の集計結果に対する確認時刻として扱う
+        confirmedGen = aggregateGen;
+      } else {
+        confirmedGen = 0;
+      }
+    });
+
     // PDF/印刷ボタン
     printBtn.addEventListener("click", () => {
-      // 集計済みかどうか（tbody に何か行があるか & 表示されているか）
-      const hasRows = tbodyEl.querySelector("tr") !== null;
-      if (!hasRows || tableWrapperEl.style.display === "none") {
+      const hasRows = tbodyEl.querySelector("tr") !== null &&
+                      tableWrapperEl.style.display !== "none";
+
+      if (!hasAggregated || !hasRows) {
         setStatus("先に集計を実行してください。");
         return;
       }
 
-      // 目視確認チェック
       if (!manualCheck.checked) {
         setStatus("PDF/印刷を行う前に「目視確認済み」にチェックを入れてください。");
+        return;
+      }
+
+      if (confirmedGen !== aggregateGen) {
+        setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。");
         return;
       }
 
@@ -413,8 +433,6 @@
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
       tableWrapperEl.style.display = "none";
-      // 新しい集計ごとに目視確認チェックをリセット
-      manualCheck.checked = false;
 
       if (!file) {
         setStatus("xlsx ファイルを選択してください。");
@@ -605,7 +623,11 @@
           });
 
           tableWrapperEl.style.display = "";
-          setStatus("");
+          hasAggregated = true;
+          aggregateGen += 1;   // 新しい集計世代
+          confirmedGen = 0;    // 目視確認は無効化（再チェック必須）
+
+          setStatus("集計が完了しました。PDF/印刷前に内容を目視確認し、「目視確認済み」にチェックを入れてください。");
 
           summaryEl.innerHTML =
             `<span class="highlight">${year}年${monthNum}月分企業防衛推進手当 合計：</span>` +
