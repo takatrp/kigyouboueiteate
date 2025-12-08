@@ -440,20 +440,20 @@
   }
 
   (function init() {
-    const statusEl = document.getElementById("status");
-    const summaryEl = document.getElementById("summary");
-    const tableWrapperEl = document.getElementById("tableWrapper");
-    const tbodyEl = document.querySelector("#resultTable tbody");
-    const runBtn = document.getElementById("runBtn");
-    const printBtn = document.getElementById("printBtn");
-    const manualCheck = document.getElementById("manualCheck");
-    const fileInput = document.getElementById("xlsxFile");
-    const fileInfoEl = document.getElementById("fileInfo");
+    const statusEl      = document.getElementById("status");
+    const summaryEl     = document.getElementById("summary");
+    const tableWrapperEl= document.getElementById("tableWrapper");
+    const tbodyEl       = document.querySelector("#resultTable tbody");
+    const runBtn        = document.getElementById("runBtn");
+    const printBtn      = document.getElementById("printBtn");
+    const manualCheck   = document.getElementById("manualCheck");
+    const fileInput     = document.getElementById("xlsxFile");
+    const fileInfoEl    = document.getElementById("fileInfo");
 
     // 集計・確認の世代管理
     let hasAggregated = false; // 一度でも正常に集計完了したか（件数0でも true）
-    let aggregateGen = 0;      // 集計の世代
-    let confirmedGen = 0;      // 目視確認した世代
+    let aggregateGen  = 0;     // 集計の世代
+    let confirmedGen  = 0;     // 目視確認した世代
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -471,8 +471,6 @@
 
     fileInput.addEventListener("change", () => {
       updateFileInfo();
-      // ファイルを変えたら集計状態は無効にした方が安全だが、
-      // ここでは再度「集計する」を押してもらう前提でフラグ変更はしない。
     });
 
     // 目視確認チェック
@@ -500,14 +498,33 @@
       }
 
       setStatus("");
+
+      // ファイル名に反映させるため、一時的にタイトルを書き換える
+      const originalTitle = document.title;
+      const yearVal  = document.getElementById("year").value.trim();
+      const monthVal = document.getElementById("month").value.trim();
+      const monthNum = parseInt(monthVal, 10);
+
+      let newTitle = originalTitle;
+      if (yearVal && Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
+        // ブラウザ側で .pdf が付くので拡張子は付けない
+        newTitle = `${yearVal}年${monthNum}月企業防衛手当明細`;
+      }
+      document.title = newTitle;
+
       window.print();
+
+      // 少し待ってからタイトルを元に戻す
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
     });
 
     // 集計処理
     runBtn.addEventListener("click", () => {
-      const year = document.getElementById("year").value.trim();
+      const year  = document.getElementById("year").value.trim();
       const month = document.getElementById("month").value.trim();
-      const file = fileInput.files[0];
+      const file  = fileInput.files[0];
 
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
@@ -534,7 +551,7 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const data = new Uint8Array(e.target.result);
+          const data     = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
           const targetSheetName = workbook.SheetNames.find(
@@ -548,7 +565,7 @@
           }
 
           const sheet = workbook.Sheets[targetSheetName];
-          const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+          const json  = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
           if (!json.length) {
             setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。");
@@ -556,33 +573,32 @@
             return;
           }
 
-          const sampleRow = json[0];
-
-          const contractKey = findColumnKey(sampleRow, "契約者名") || "契約者名";
-          const seisekiKey  = findColumnKey(sampleRow, "成績")    || "成績";
-          const nyukinKey   = findColumnKey(sampleRow, "入金回数") || "入金回数";
-          const rewardKey   =
+          const sampleRow  = json[0];
+          const contractKey= findColumnKey(sampleRow, "契約者名") || "契約者名";
+          const seisekiKey = findColumnKey(sampleRow, "成績")    || "成績";
+          const nyukinKey  = findColumnKey(sampleRow, "入金回数") || "入金回数";
+          const rewardKey  =
             findColumnKey(sampleRow, ["報酬"], ["計算用"]) ||
             findColumnKey(sampleRow, "報酬") || "報酬";
 
           const rows = [];
           for (const row of json) {
-            const seiseki = String(row[seisekiKey] || "");
+            const seiseki   = String(row[seisekiKey] || "");
             const nyukinRaw = normalizeNyukin(row[nyukinKey]);
 
             if (!seiseki.includes("初年度")) continue;
             if (!(nyukinRaw === "1" || nyukinRaw === "1-1")) continue;
 
-            const firstReward = parseAmount(row[rewardKey]);
-            const bonus = Math.floor(firstReward * 12 * 0.1);
-            const contractorName = row[contractKey] || "";
+            const firstReward   = parseAmount(row[rewardKey]);
+            const bonus         = Math.floor(firstReward * 12 * 0.1);
+            const contractorName= row[contractKey] || "";
 
             rows.push({
-              contractor: contractorName,
-              seiseki: seiseki,
-              nyukin: nyukinRaw,
-              firstReward: firstReward,
-              bonus: bonus
+              contractor:   contractorName,
+              seiseki:      seiseki,
+              nyukin:       nyukinRaw,
+              firstReward:  firstReward,
+              bonus:        bonus
             });
           }
 
