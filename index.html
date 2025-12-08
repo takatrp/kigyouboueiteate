@@ -95,7 +95,7 @@
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 12px 16px;
       align-items: flex-end;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .field {
       display: flex;
@@ -123,11 +123,15 @@
       box-shadow: 0 0 0 1px rgba(87, 136, 153, 0.25);
       background: #ffffff;
     }
-    .button-row {
+
+    /* STEP2,3,4 縦並び */
+    .field-actions .button-row {
       display: flex;
+      flex-direction: column;
       gap: 8px;
-      flex-wrap: wrap;
+      align-items: flex-start;
     }
+
     button {
       padding: 9px 16px;
       border-radius: 999px;
@@ -167,22 +171,27 @@
       box-shadow: none;
       cursor: default;
     }
-    .confirm-row {
-      margin-bottom: 8px;
-      font-size: 0.86rem;
-      color: var(--muted);
-    }
+
     .check-label {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       cursor: pointer;
+      font-size: 0.86rem;
+      color: var(--muted);
     }
     .check-label input[type="checkbox"] {
       width: 16px;
       height: 16px;
       cursor: pointer;
     }
+
+    .file-info {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 4px 0 6px;
+    }
+
     .status {
       font-size: 0.82rem;
       color: var(--muted);
@@ -289,9 +298,9 @@
         box-shadow: none;
         border-radius: 0;
       }
-      .button-row,
+      /* ボタンとファイル選択だけ消し、フローは非表示 */
+      .button-row button,
       input[type="file"],
-      .confirm-row,
       .flow {
         display: none !important;
       }
@@ -345,27 +354,26 @@
       </div>
       <div class="field">
         <label for="month">対象月</label>
-        <input type="number" id="month" value="7" min="1" max="12" />
+        <input type="number" id="month" value="3" min="1" max="12" />
       </div>
       <div class="field">
         <label for="xlsxFile">代理店報酬明細書（.xlsx）</label>
         <input type="file" id="xlsxFile" accept=".xlsx,.xls" />
       </div>
-      <div class="field">
+      <div class="field field-actions">
         <label>&nbsp;</label>
         <div class="button-row">
           <button id="runBtn" type="button" class="primary">STEP2 集計する</button>
+          <label class="check-label">
+            <input type="checkbox" id="manualCheck" />
+            <span>STEP3 目視確認済み</span>
+          </label>
           <button id="printBtn" type="button" class="secondary">STEP4 PDF/印刷</button>
         </div>
       </div>
     </form>
 
-    <div class="confirm-row">
-      <label class="check-label">
-        <input type="checkbox" id="manualCheck" />
-        <span>STEP3 目視確認済み</span>
-      </label>
-    </div>
+    <div id="fileInfo" class="file-info"></div>
 
     <div id="status" class="status"></div>
     <div id="summary" class="summary"></div>
@@ -397,7 +405,7 @@
 </div>
 
 <script>
-  // 金額を数値に変換（"15,000" や "15 000" や 数値型にも対応）
+  // 金額を数値に変換
   function parseAmount(val) {
     if (val == null) return 0;
     if (typeof val === "number") return Math.floor(val);
@@ -405,7 +413,7 @@
     return digits ? parseInt(digits, 10) : 0;
   }
 
-  // 列名を「含む」かどうかで探す（除外キーワードも指定可）
+  // 列名を「含む」かどうかで探す
   function findColumnKey(sampleRow, includeKeywords, excludeKeywords) {
     const keys = Object.keys(sampleRow || {});
     const includes = Array.isArray(includeKeywords) ? includeKeywords : [includeKeywords];
@@ -422,7 +430,7 @@
     return null;
   }
 
-  // 入金回数の正規化（"1- 1" → "1-1"、全角ハイフンも半角に）
+  // 入金回数の正規化
   function normalizeNyukin(val) {
     if (val == null) return "";
     let s = String(val);
@@ -439,20 +447,37 @@
     const runBtn = document.getElementById("runBtn");
     const printBtn = document.getElementById("printBtn");
     const manualCheck = document.getElementById("manualCheck");
+    const fileInput = document.getElementById("xlsxFile");
+    const fileInfoEl = document.getElementById("fileInfo");
 
     // 集計・確認の世代管理
-    let hasAggregated = false;      // 一度でも正常に集計完了したか（件数0でも true）
-    let aggregateGen = 0;           // 集計の世代（1回成功するごとに +1）
-    let confirmedGen = 0;           // 目視確認したときの世代
+    let hasAggregated = false; // 一度でも正常に集計完了したか（件数0でも true）
+    let aggregateGen = 0;      // 集計の世代
+    let confirmedGen = 0;      // 目視確認した世代
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
     }
 
-    // 目視確認チェックが変更されたとき
+    // ファイル名表示
+    function updateFileInfo() {
+      const file = fileInput.files[0];
+      if (file) {
+        fileInfoEl.textContent = "読込ファイル：" + file.name;
+      } else {
+        fileInfoEl.textContent = "";
+      }
+    }
+
+    fileInput.addEventListener("change", () => {
+      updateFileInfo();
+      // ファイルを変えたら集計状態は無効にした方が安全だが、
+      // ここでは再度「集計する」を押してもらう前提でフラグ変更はしない。
+    });
+
+    // 目視確認チェック
     manualCheck.addEventListener("change", () => {
       if (manualCheck.checked && hasAggregated) {
-        // 最新の集計結果に対する確認時刻として扱う
         confirmedGen = aggregateGen;
       } else {
         confirmedGen = 0;
@@ -465,12 +490,10 @@
         setStatus("先に STEP2「集計する」を実行してください。");
         return;
       }
-
       if (!manualCheck.checked) {
         setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。");
         return;
       }
-
       if (confirmedGen !== aggregateGen) {
         setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。");
         return;
@@ -480,10 +503,10 @@
       window.print();
     });
 
+    // 集計処理
     runBtn.addEventListener("click", () => {
       const year = document.getElementById("year").value.trim();
       const month = document.getElementById("month").value.trim();
-      const fileInput = document.getElementById("xlsxFile");
       const file = fileInput.files[0];
 
       summaryEl.textContent = "";
@@ -504,6 +527,7 @@
         return;
       }
 
+      updateFileInfo();
       setStatus("ファイルを読み込んでいます…");
       runBtn.disabled = true;
 
@@ -513,7 +537,6 @@
           const data = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          // 「代理店報酬明細書(詳細)」シートを明示的に選択
           const targetSheetName = workbook.SheetNames.find(
             name => name === "代理店報酬明細書(詳細)"
           );
@@ -525,8 +548,6 @@
           }
 
           const sheet = workbook.Sheets[targetSheetName];
-
-          // ヘッダー行を元にオブジェクト配列に変換（空セルも defval で空文字に）
           const json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
           if (!json.length) {
@@ -544,18 +565,16 @@
             findColumnKey(sampleRow, ["報酬"], ["計算用"]) ||
             findColumnKey(sampleRow, "報酬") || "報酬";
 
-          // 条件に合致する行を抽出
           const rows = [];
           for (const row of json) {
             const seiseki = String(row[seisekiKey] || "");
             const nyukinRaw = normalizeNyukin(row[nyukinKey]);
 
-            // 成績に「初年度」を含み、入金回数が 1 または 1-1
             if (!seiseki.includes("初年度")) continue;
             if (!(nyukinRaw === "1" || nyukinRaw === "1-1")) continue;
 
             const firstReward = parseAmount(row[rewardKey]);
-            const bonus = Math.floor(firstReward * 12 * 0.1); // 12ヶ月×10%（円未満切捨て）
+            const bonus = Math.floor(firstReward * 12 * 0.1);
             const contractorName = row[contractKey] || "";
 
             rows.push({
@@ -567,7 +586,6 @@
             });
           }
 
-          // 契約者ごとにグルーピング
           let totalBonus = 0;
           const groups = {};
 
@@ -584,24 +602,21 @@
           tbodyEl.innerHTML = "";
 
           if (!rows.length) {
-            // 該当無しだが、集計は完了扱いとする
             tableWrapperEl.style.display = "none";
             hasAggregated = true;
             aggregateGen += 1;
             confirmedGen = 0;
-            setStatus("集計が完了しました（該当する初年度第1回報酬はありません）。必要に応じて STEP3「目視確認済み」にチェックのうえ、STEP4「PDF/印刷」でレポートを出力できます。");
+            setStatus("集計が完了しました（該当する初年度第1回報酬はありません）。STEP3 で「目視確認済み」にチェックを入れると、STEP4 で PDF/印刷が可能です。");
             summaryEl.textContent = "該当無し";
             runBtn.disabled = false;
             return;
           }
 
-          // 表示用にソート（契約者名順）
           const contractorNames = Object.keys(groups).sort((a, b) => a.localeCompare(b, "ja"));
 
           contractorNames.forEach(contractorName => {
             const group = groups[contractorName];
 
-            // グループヘッダー行
             const headerTr = document.createElement("tr");
             headerTr.className = "group-header";
             const headerTd = document.createElement("td");
@@ -610,7 +625,6 @@
             headerTr.appendChild(headerTd);
             tbodyEl.appendChild(headerTr);
 
-            // 明細行（担当者欄は空のまま表示のみ）
             group.details.forEach(r => {
               const tr = document.createElement("tr");
 
@@ -646,7 +660,6 @@
               tbodyEl.appendChild(tr);
             });
 
-            // 契約者ごとの小計行（担当者入力付き）
             const subtotalTr = document.createElement("tr");
             subtotalTr.className = "subtotal-row";
 
@@ -685,8 +698,8 @@
 
           tableWrapperEl.style.display = "";
           hasAggregated = true;
-          aggregateGen += 1;   // 新しい集計世代
-          confirmedGen = 0;    // 目視確認は無効化（再チェック必須）
+          aggregateGen += 1;
+          confirmedGen = 0;
 
           setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
 
