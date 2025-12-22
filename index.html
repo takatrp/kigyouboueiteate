@@ -40,7 +40,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+     競     flex-wrap: wrap;
     }
     h1 span.badge {
       font-size: 0.72rem;
@@ -309,6 +309,20 @@
         overflow: visible;
         border: none;
       }
+      /* ★ 印刷時は sticky を無効化し、ヘッダーが重ならないようにする */
+      thead tr {
+        position: static !important;
+      }
+      thead {
+        display: table-header-group;
+      }
+      tfoot {
+        display: table-footer-group;
+      }
+      /* 行途中での改ページを避ける（可能な範囲で） */
+      tr, td, th {
+        page-break-inside: avoid;
+      }
     }
   </style>
 
@@ -507,7 +521,6 @@
 
       let newTitle = originalTitle;
       if (yearVal && Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
-        // ブラウザ側で .pdf が付くので拡張子は付けない
         newTitle = `${yearVal}年${monthNum}月企業防衛手当明細`;
       }
       document.title = newTitle;
@@ -573,11 +586,11 @@
             return;
           }
 
-          const sampleRow  = json[0];
-          const contractKey= findColumnKey(sampleRow, "契約者名") || "契約者名";
-          const seisekiKey = findColumnKey(sampleRow, "成績")    || "成績";
-          const nyukinKey  = findColumnKey(sampleRow, "入金回数") || "入金回数";
-          const rewardKey  =
+          const sampleRow   = json[0];
+          const contractKey = findColumnKey(sampleRow, "契約者名") || "契約者名";
+          const seisekiKey  = findColumnKey(sampleRow, "成績")    || "成績";
+          const nyukinKey   = findColumnKey(sampleRow, "入金回数") || "入金回数";
+          const rewardKey   =
             findColumnKey(sampleRow, ["報酬"], ["計算用"]) ||
             findColumnKey(sampleRow, "報酬") || "報酬";
 
@@ -589,9 +602,9 @@
             if (!seiseki.includes("初年度")) continue;
             if (!(nyukinRaw === "1" || nyukinRaw === "1-1")) continue;
 
-            const firstReward   = parseAmount(row[rewardKey]);
-            const bonus         = Math.floor(firstReward * 12 * 0.1);
-            const contractorName= row[contractKey] || "";
+            const firstReward    = parseAmount(row[rewardKey]);
+            const bonus          = Math.floor(firstReward * 12 * 0.1);
+            const contractorName = row[contractKey] || "";
 
             rows.push({
               contractor:   contractorName,
