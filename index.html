@@ -40,7 +40,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-     競     flex-wrap: wrap;
+      flex-wrap: wrap;
     }
     h1 span.badge {
       font-size: 0.72rem;
@@ -298,7 +298,6 @@
         box-shadow: none;
         border-radius: 0;
       }
-      /* ボタンとファイル選択だけ消し、フローは非表示 */
       .button-row button,
       input[type="file"],
       .flow {
@@ -309,7 +308,6 @@
         overflow: visible;
         border: none;
       }
-      /* ★ 印刷時は sticky を無効化し、ヘッダーが重ならないようにする */
       thead tr {
         position: static !important;
       }
@@ -319,7 +317,6 @@
       tfoot {
         display: table-footer-group;
       }
-      /* 行途中での改ページを避ける（可能な範囲で） */
       tr, td, th {
         page-break-inside: avoid;
       }
@@ -463,14 +460,42 @@
     const manualCheck   = document.getElementById("manualCheck");
     const fileInput     = document.getElementById("xlsxFile");
     const fileInfoEl    = document.getElementById("fileInfo");
+    const yearInput     = document.getElementById("year");
+    const monthInput    = document.getElementById("month");
 
     // 集計・確認の世代管理
-    let hasAggregated = false; // 一度でも正常に集計完了したか（件数0でも true）
-    let aggregateGen  = 0;     // 集計の世代
-    let confirmedGen  = 0;     // 目視確認した世代
+    let hasAggregated = false;
+    let aggregateGen  = 0;
+    let confirmedGen  = 0;
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
+    }
+
+    // ファイル名 ⇒ 対象年・対象月を自動セット
+    function autoFillYearMonthFromFilename(fileName) {
+      if (!fileName) return;
+      // 例: 9998974_202512.xlsx → 2025 / 12
+      let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$/i)/);
+      if (!match) {
+        // 下線が無い場合でも、拡張子直前の6桁を拾う
+        match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$/i)/);
+      }
+      if (!match) return;
+
+      const yyyymm   = match[1];
+      const yearStr  = yyyymm.slice(0, 4);
+      const monthStr = yyyymm.slice(4, 6);
+
+      const yearNum  = parseInt(yearStr, 10);
+      const monthNum = parseInt(monthStr, 10);
+
+      if (Number.isFinite(yearNum) && yearNum >= 2000 && yearNum <= 2100) {
+        yearInput.value = yearNum;
+      }
+      if (Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
+        monthInput.value = monthNum;
+      }
     }
 
     // ファイル名表示
@@ -478,6 +503,7 @@
       const file = fileInput.files[0];
       if (file) {
         fileInfoEl.textContent = "読込ファイル：" + file.name;
+        autoFillYearMonthFromFilename(file.name);
       } else {
         fileInfoEl.textContent = "";
       }
@@ -513,10 +539,9 @@
 
       setStatus("");
 
-      // ファイル名に反映させるため、一時的にタイトルを書き換える
       const originalTitle = document.title;
-      const yearVal  = document.getElementById("year").value.trim();
-      const monthVal = document.getElementById("month").value.trim();
+      const yearVal  = yearInput.value.trim();
+      const monthVal = monthInput.value.trim();
       const monthNum = parseInt(monthVal, 10);
 
       let newTitle = originalTitle;
@@ -527,7 +552,6 @@
 
       window.print();
 
-      // 少し待ってからタイトルを元に戻す
       setTimeout(() => {
         document.title = originalTitle;
       }, 1000);
@@ -535,8 +559,8 @@
 
     // 集計処理
     runBtn.addEventListener("click", () => {
-      const year  = document.getElementById("year").value.trim();
-      const month = document.getElementById("month").value.trim();
+      const year  = yearInput.value.trim();
+      const month = monthInput.value.trim();
       const file  = fileInput.files[0];
 
       summaryEl.textContent = "";
@@ -548,7 +572,7 @@
         return;
       }
       if (!year || !month) {
-        setStatus("対象年と対象月を入力してください。");
+        setStatus("対象年と対象月を入力（または自動設定）してください。");
         return;
       }
       const monthNum = parseInt(month, 10);
