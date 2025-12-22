@@ -475,11 +475,12 @@
     // ファイル名 ⇒ 対象年・対象月を自動セット
     function autoFillYearMonthFromFilename(fileName) {
       if (!fileName) return;
+
       // 例: 9998974_202512.xlsx → 2025 / 12
-      let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$/i)/);
+      let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
       if (!match) {
         // 下線が無い場合でも、拡張子直前の6桁を拾う
-        match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$/i)/);
+        match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
       }
       if (!match) return;
 
