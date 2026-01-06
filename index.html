@@ -13,8 +13,11 @@
       --ink: #111827;
       --muted: #6b7280;
       --border: #e5e7eb;
-      --accent-soft: #e5f0f6;
+      --accent-soft: #e5e7eb; /* subtle */
+      --accent-soft2: #e5f0f6;
       --subtotal-bg: #fef9c3;
+      --chip-bg: #eef2f7;
+      --chip-bg-active: #e0edf4;
     }
     * { box-sizing: border-box; }
     body {
@@ -24,10 +27,7 @@
       background: var(--bg);
       color: var(--ink);
     }
-    .shell {
-      max-width: 1040px;
-      margin: 0 auto;
-    }
+    .shell { max-width: 1040px; margin: 0 auto; }
     .card {
       background: var(--card);
       border-radius: 16px;
@@ -86,9 +86,7 @@
       font-size: 0.72rem;
       font-weight: 700;
     }
-    .flow-step .step-text {
-      font-weight: 500;
-    }
+    .flow-step .step-text { font-weight: 500; }
 
     form {
       display: grid;
@@ -103,9 +101,7 @@
       gap: 4px;
       font-size: 0.86rem;
     }
-    label {
-      color: var(--muted);
-    }
+    label { color: var(--muted); }
     input[type="number"],
     input[type="file"],
     input[type="text"] {
@@ -122,6 +118,39 @@
       border-color: var(--brand);
       box-shadow: 0 0 0 1px rgba(87, 136, 153, 0.25);
       background: #ffffff;
+    }
+
+    /* 料率チップ */
+    .rate-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--chip-bg);
+      color: #111827;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 2px 6px rgba(148, 163, 184, 0.25);
+    }
+    .chip:hover { background: #e5e7eb; }
+    .chip.active {
+      border-color: rgba(87, 136, 153, 0.7);
+      background: var(--chip-bg-active);
+      box-shadow: 0 6px 14px rgba(87, 136, 153, 0.20);
+      font-weight: 700;
+      color: var(--brand-dark);
     }
 
     /* STEP2,3,4 縦並び */
@@ -159,9 +188,7 @@
       color: #111827;
       box-shadow: 0 3px 8px rgba(148, 163, 184, 0.35);
     }
-    button.secondary:hover {
-      background: #d1d5db;
-    }
+    button.secondary:hover { background: #d1d5db; }
     button.secondary:active {
       transform: translateY(1px);
       box-shadow: 0 2px 6px rgba(148, 163, 184, 0.3);
@@ -203,9 +230,8 @@
       font-weight: 600;
       margin: 6px 0 10px;
     }
-    .summary span.highlight {
-      color: var(--brand-dark);
-    }
+    .summary span.highlight { color: var(--brand-dark); }
+
     .table-wrapper {
       max-height: 520px;
       overflow: auto;
@@ -241,31 +267,22 @@
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
-    tr:nth-child(even) td.detail-row-cell {
-      background: #f9fafb;
-    }
+    tr:nth-child(even) td.detail-row-cell { background: #f9fafb; }
     .group-header td {
-      background: var(--accent-soft);
+      background: var(--accent-soft2);
       font-weight: 600;
       color: #1f2937;
       border-bottom: 1px solid #d1d5db;
     }
-    .group-header span.label {
-      opacity: 0.9;
-    }
+    .group-header span.label { opacity: 0.9; }
     .subtotal-row td {
       background: var(--subtotal-bg);
       font-weight: 600;
       border-top: 1px solid #eab308;
       border-bottom: 1px solid #eab308;
     }
-    .subtotal-row td.num {
-      font-size: 0.9rem;
-    }
-    .subtotal-input {
-      max-width: 160px;
-      font-size: 0.8rem;
-    }
+    .subtotal-row td.num { font-size: 0.9rem; }
+    .subtotal-input { max-width: 160px; font-size: 0.8rem; }
     .note {
       font-size: 0.8rem;
       color: var(--muted);
@@ -273,57 +290,26 @@
       line-height: 1.5;
     }
     @media (max-width: 640px) {
-      .card {
-        padding: 16px 14px 20px;
-      }
-      h1 {
-        font-size: 1.2rem;
-      }
-      form {
-        grid-template-columns: 1fr;
-      }
-      .table-wrapper {
-        max-height: 400px;
-      }
-      .flow-step {
-        width: 100%;
-      }
+      .card { padding: 16px 14px 20px; }
+      h1 { font-size: 1.2rem; }
+      form { grid-template-columns: 1fr; }
+      .table-wrapper { max-height: 400px; }
+      .flow-step { width: 100%; }
     }
     @media print {
-      body {
-        background: #ffffff;
-        padding: 0;
-      }
-      .card {
-        box-shadow: none;
-        border-radius: 0;
-      }
+      body { background: #ffffff; padding: 0; }
+      .card { box-shadow: none; border-radius: 0; }
       .button-row button,
       input[type="file"],
-      .flow {
-        display: none !important;
-      }
-      .table-wrapper {
-        max-height: none;
-        overflow: visible;
-        border: none;
-      }
-      thead tr {
-        position: static !important;
-      }
-      thead {
-        display: table-header-group;
-      }
-      tfoot {
-        display: table-footer-group;
-      }
-      tr, td, th {
-        page-break-inside: avoid;
-      }
+      .flow { display: none !important; }
+      .table-wrapper { max-height: none; overflow: visible; border: none; }
+      thead tr { position: static !important; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
+      tr, td, th { page-break-inside: avoid; }
     }
   </style>
 
-  <!-- SheetJS (XLSX) CDN -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -334,28 +320,15 @@
       <span class="badge">代理店報酬明細書(詳細) シート対応</span>
     </h1>
     <div class="subtitle">
-      「代理店報酬明細書(詳細)」シートから、<strong>初年度第1回報酬 × 12ヶ月 × 10％</strong> を契約者ごとに集計し、
+      「代理店報酬明細書(詳細)」シートから、<strong>初年度第1回報酬 × 12ヶ月 × 料率</strong> を契約者ごとに集計し、
       担当者入力と目視確認付きのレポートを作成します。
     </div>
 
-    <!-- フロー表示 -->
     <div class="flow">
-      <div class="flow-step">
-        <span class="step-no">1</span>
-        <span class="step-text">対象年月とファイルを指定</span>
-      </div>
-      <div class="flow-step">
-        <span class="step-no">2</span>
-        <span class="step-text">「集計する」を押す</span>
-      </div>
-      <div class="flow-step">
-        <span class="step-no">3</span>
-        <span class="step-text">内容を確認し「目視確認済み」にチェック</span>
-      </div>
-      <div class="flow-step">
-        <span class="step-no">4</span>
-        <span class="step-text">「PDF/印刷」でレポート出力</span>
-      </div>
+      <div class="flow-step"><span class="step-no">1</span><span class="step-text">対象年月とファイルを指定</span></div>
+      <div class="flow-step"><span class="step-no">2</span><span class="step-text">「集計する」を押す</span></div>
+      <div class="flow-step"><span class="step-no">3</span><span class="step-text">内容を確認し「目視確認済み」にチェック</span></div>
+      <div class="flow-step"><span class="step-no">4</span><span class="step-text">「PDF/印刷」でレポート出力</span></div>
     </div>
 
     <form id="controlForm" onsubmit="return false;">
@@ -363,14 +336,32 @@
         <label for="year">対象年（西暦）</label>
         <input type="number" id="year" value="2025" min="2000" max="2100" />
       </div>
+
       <div class="field">
         <label for="month">対象月</label>
         <input type="number" id="month" value="3" min="1" max="12" />
       </div>
+
+      <!-- 料率（手入力＋チップ） -->
+      <div class="field">
+        <label for="ratePct">料率（%）</label>
+        <div class="rate-row">
+          <input type="number" id="ratePct" value="10" min="0" max="100" step="0.1" />
+        </div>
+        <div class="chips" id="rateChips">
+          <button type="button" class="chip active" data-rate="10">10%</button>
+          <button type="button" class="chip" data-rate="15">15%</button>
+          <button type="button" class="chip" data-rate="20">20%</button>
+          <button type="button" class="chip" data-rate="25">25%</button>
+          <button type="button" class="chip" data-rate="30">30%</button>
+        </div>
+      </div>
+
       <div class="field">
         <label for="xlsxFile">代理店報酬明細書（.xlsx）</label>
         <input type="file" id="xlsxFile" accept=".xlsx,.xls" />
       </div>
+
       <div class="field field-actions">
         <label>&nbsp;</label>
         <div class="button-row">
@@ -385,7 +376,6 @@
     </form>
 
     <div id="fileInfo" class="file-info"></div>
-
     <div id="status" class="status"></div>
     <div id="summary" class="summary"></div>
 
@@ -406,17 +396,15 @@
     </div>
 
     <div class="note">
-      ・「代理店報酬明細書(詳細)」シートのヘッダー行に「契約者名」「成績」「入金回数」「報酬」を含む列がある前提です。<br />
       ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
-      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 10％（円未満切捨て）で計算しています。<br />
-      ・契約者ごとに小計行を表示し、その行の「担当者」欄に社内の担当者名を入力できます（印刷・PDF にも反映されます）。<br />
+      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 料率（%/100）（円未満切捨て）で計算しています。<br />
+      ・契約者ごとに小計行を表示し、小計行に担当者名を入力できます（印刷・PDF にも反映されます）。<br />
       ・該当無しの場合でも、「目視確認済み」にチェックした上で PDF/印刷が可能です。
     </div>
   </div>
 </div>
 
 <script>
-  // 金額を数値に変換
   function parseAmount(val) {
     if (val == null) return 0;
     if (typeof val === "number") return Math.floor(val);
@@ -424,24 +412,16 @@
     return digits ? parseInt(digits, 10) : 0;
   }
 
-  // 列名を「含む」かどうかで探す
   function findColumnKey(sampleRow, includeKeywords, excludeKeywords) {
     const keys = Object.keys(sampleRow || {});
     const includes = Array.isArray(includeKeywords) ? includeKeywords : [includeKeywords];
     const excludes = Array.isArray(excludeKeywords) ? excludeKeywords : (excludeKeywords ? [excludeKeywords] : []);
-
     for (const key of keys) {
-      if (
-        includes.every(k => key.includes(k)) &&
-        excludes.every(k => !key.includes(k))
-      ) {
-        return key;
-      }
+      if (includes.every(k => key.includes(k)) && excludes.every(k => !key.includes(k))) return key;
     }
     return null;
   }
 
-  // 入金回数の正規化
   function normalizeNyukin(val) {
     if (val == null) return "";
     let s = String(val);
@@ -451,55 +431,41 @@
   }
 
   (function init() {
-    const statusEl      = document.getElementById("status");
-    const summaryEl     = document.getElementById("summary");
-    const tableWrapperEl= document.getElementById("tableWrapper");
-    const tbodyEl       = document.querySelector("#resultTable tbody");
-    const runBtn        = document.getElementById("runBtn");
-    const printBtn      = document.getElementById("printBtn");
-    const manualCheck   = document.getElementById("manualCheck");
-    const fileInput     = document.getElementById("xlsxFile");
-    const fileInfoEl    = document.getElementById("fileInfo");
-    const yearInput     = document.getElementById("year");
-    const monthInput    = document.getElementById("month");
+    const statusEl       = document.getElementById("status");
+    const summaryEl      = document.getElementById("summary");
+    const tableWrapperEl = document.getElementById("tableWrapper");
+    const tbodyEl        = document.querySelector("#resultTable tbody");
+    const runBtn         = document.getElementById("runBtn");
+    const printBtn       = document.getElementById("printBtn");
+    const manualCheck    = document.getElementById("manualCheck");
+    const fileInput      = document.getElementById("xlsxFile");
+    const fileInfoEl     = document.getElementById("fileInfo");
+    const yearInput      = document.getElementById("year");
+    const monthInput     = document.getElementById("month");
 
-    // 集計・確認の世代管理
+    const rateInput      = document.getElementById("ratePct");
+    const chipsWrap      = document.getElementById("rateChips");
+
     let hasAggregated = false;
     let aggregateGen  = 0;
     let confirmedGen  = 0;
 
-    function setStatus(msg) {
-      statusEl.textContent = msg || "";
-    }
+    function setStatus(msg) { statusEl.textContent = msg || ""; }
 
-    // ファイル名 ⇒ 対象年・対象月を自動セット
     function autoFillYearMonthFromFilename(fileName) {
       if (!fileName) return;
-
-      // 例: 9998974_202512.xlsx → 2025 / 12
       let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
-      if (!match) {
-        // 下線が無い場合でも、拡張子直前の6桁を拾う
-        match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
-      }
+      if (!match) match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
       if (!match) return;
 
-      const yyyymm   = match[1];
-      const yearStr  = yyyymm.slice(0, 4);
-      const monthStr = yyyymm.slice(4, 6);
+      const yyyymm = match[1];
+      const yearNum  = parseInt(yyyymm.slice(0, 4), 10);
+      const monthNum = parseInt(yyyymm.slice(4, 6), 10);
 
-      const yearNum  = parseInt(yearStr, 10);
-      const monthNum = parseInt(monthStr, 10);
-
-      if (Number.isFinite(yearNum) && yearNum >= 2000 && yearNum <= 2100) {
-        yearInput.value = yearNum;
-      }
-      if (Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
-        monthInput.value = monthNum;
-      }
+      if (Number.isFinite(yearNum) && yearNum >= 2000 && yearNum <= 2100) yearInput.value = yearNum;
+      if (Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) monthInput.value = monthNum;
     }
 
-    // ファイル名表示
     function updateFileInfo() {
       const file = fileInput.files[0];
       if (file) {
@@ -509,41 +475,39 @@
         fileInfoEl.textContent = "";
       }
     }
+    fileInput.addEventListener("change", updateFileInfo);
 
-    fileInput.addEventListener("change", () => {
-      updateFileInfo();
+    function syncActiveChip() {
+      const current = parseFloat(rateInput.value);
+      const chips = chipsWrap.querySelectorAll(".chip");
+      chips.forEach(btn => {
+        const r = parseFloat(btn.dataset.rate);
+        btn.classList.toggle("active", Number.isFinite(current) && Number.isFinite(r) && current === r);
+      });
+    }
+    chipsWrap.addEventListener("click", (ev) => {
+      const btn = ev.target.closest(".chip");
+      if (!btn) return;
+      rateInput.value = btn.dataset.rate;
+      syncActiveChip();
     });
+    rateInput.addEventListener("input", syncActiveChip);
 
-    // 目視確認チェック
     manualCheck.addEventListener("change", () => {
-      if (manualCheck.checked && hasAggregated) {
-        confirmedGen = aggregateGen;
-      } else {
-        confirmedGen = 0;
-      }
+      if (manualCheck.checked && hasAggregated) confirmedGen = aggregateGen;
+      else confirmedGen = 0;
     });
 
-    // PDF/印刷ボタン
     printBtn.addEventListener("click", () => {
-      if (!hasAggregated) {
-        setStatus("先に STEP2「集計する」を実行してください。");
-        return;
-      }
-      if (!manualCheck.checked) {
-        setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。");
-        return;
-      }
-      if (confirmedGen !== aggregateGen) {
-        setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。");
-        return;
-      }
+      if (!hasAggregated) { setStatus("先に STEP2「集計する」を実行してください。"); return; }
+      if (!manualCheck.checked) { setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。"); return; }
+      if (confirmedGen !== aggregateGen) { setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。"); return; }
 
       setStatus("");
 
       const originalTitle = document.title;
       const yearVal  = yearInput.value.trim();
-      const monthVal = monthInput.value.trim();
-      const monthNum = parseInt(monthVal, 10);
+      const monthNum = parseInt(monthInput.value.trim(), 10);
 
       let newTitle = originalTitle;
       if (yearVal && Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
@@ -553,29 +517,28 @@
 
       window.print();
 
-      setTimeout(() => {
-        document.title = originalTitle;
-      }, 1000);
+      setTimeout(() => { document.title = originalTitle; }, 1000);
     });
 
-    // 集計処理
     runBtn.addEventListener("click", () => {
       const year  = yearInput.value.trim();
       const month = monthInput.value.trim();
       const file  = fileInput.files[0];
 
+      const ratePct = parseFloat(rateInput.value);
+      if (!Number.isFinite(ratePct) || ratePct < 0 || ratePct > 100) {
+        setStatus("料率（%）は 0〜100 の範囲で入力してください。");
+        return;
+      }
+      const rate = ratePct / 100;
+
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
       tableWrapperEl.style.display = "none";
 
-      if (!file) {
-        setStatus("xlsx ファイルを選択してください。");
-        return;
-      }
-      if (!year || !month) {
-        setStatus("対象年と対象月を入力（または自動設定）してください。");
-        return;
-      }
+      if (!file) { setStatus("xlsx ファイルを選択してください。"); return; }
+      if (!year || !month) { setStatus("対象年と対象月を入力（または自動設定）してください。"); return; }
+
       const monthNum = parseInt(month, 10);
       if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) {
         setStatus("対象月は 1〜12 の範囲で入力してください。");
@@ -592,10 +555,7 @@
           const data     = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          const targetSheetName = workbook.SheetNames.find(
-            name => name === "代理店報酬明細書(詳細)"
-          );
-
+          const targetSheetName = workbook.SheetNames.find(name => name === "代理店報酬明細書(詳細)");
           if (!targetSheetName) {
             setStatus("ブック内に「代理店報酬明細書(詳細)」シートが見つかりません。シート名をご確認ください。");
             runBtn.disabled = false;
@@ -604,7 +564,6 @@
 
           const sheet = workbook.Sheets[targetSheetName];
           const json  = XLSX.utils.sheet_to_json(sheet, { defval: "" });
-
           if (!json.length) {
             setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。");
             runBtn.disabled = false;
@@ -628,16 +587,10 @@
             if (!(nyukinRaw === "1" || nyukinRaw === "1-1")) continue;
 
             const firstReward    = parseAmount(row[rewardKey]);
-            const bonus          = Math.floor(firstReward * 12 * 0.1);
+            const bonus          = Math.floor(firstReward * 12 * rate);
             const contractorName = row[contractKey] || "";
 
-            rows.push({
-              contractor:   contractorName,
-              seiseki:      seiseki,
-              nyukin:       nyukinRaw,
-              firstReward:  firstReward,
-              bonus:        bonus
-            });
+            rows.push({ contractor: contractorName, seiseki, nyukin: nyukinRaw, firstReward, bonus });
           }
 
           let totalBonus = 0;
@@ -645,9 +598,7 @@
 
           rows.forEach(r => {
             const key = r.contractor || "(契約者名なし)";
-            if (!groups[key]) {
-              groups[key] = { details: [], subtotal: 0 };
-            }
+            if (!groups[key]) groups[key] = { details: [], subtotal: 0 };
             groups[key].details.push(r);
             groups[key].subtotal += r.bonus;
             totalBonus += r.bonus;
@@ -729,17 +680,11 @@
             tdTantouInput.appendChild(input);
             subtotalTr.appendChild(tdTantouInput);
 
-            const tdBlank1 = document.createElement("td");
-            tdBlank1.textContent = "";
-            subtotalTr.appendChild(tdBlank1);
-
-            const tdBlank2 = document.createElement("td");
-            tdBlank2.textContent = "";
-            subtotalTr.appendChild(tdBlank2);
+            subtotalTr.appendChild(document.createElement("td"));
+            subtotalTr.appendChild(document.createElement("td"));
 
             const tdBlank3 = document.createElement("td");
             tdBlank3.className = "num";
-            tdBlank3.textContent = "";
             subtotalTr.appendChild(tdBlank3);
 
             const tdSubtotalValue = document.createElement("td");
@@ -758,7 +703,7 @@
           setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
 
           summaryEl.innerHTML =
-            `<span class="highlight">${year}年${monthNum}月分企業防衛推進手当 合計：</span>` +
+            `<span class="highlight">${year}年${monthNum}月分企業防衛推進手当 合計（料率 ${ratePct}%）：</span>` +
             `${totalBonus.toLocaleString("ja-JP")}円`;
 
         } catch (err) {
@@ -776,6 +721,9 @@
 
       reader.readAsArrayBuffer(file);
     });
+
+    // 初期同期
+    syncActiveChip();
   })();
 </script>
 </body>
