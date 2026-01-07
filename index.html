@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>企業防衛推進手当 集計ツール（代理店報酬明細書(詳細)）</title>
+
   <style>
     :root{
       --brand:#578899;
@@ -17,6 +18,7 @@
       --subtotal-bg:#fef9c3;
       --chip-bg:#eef2f7;
       --chip-bg-active:#e0edf4;
+      --danger:#b91c1c;
     }
     *{box-sizing:border-box;}
     body{
@@ -33,6 +35,7 @@
       padding:20px 20px 24px;
       box-shadow:0 14px 35px rgba(15,23,42,0.08);
     }
+
     h1{
       font-size:1.4rem;
       margin:0 0 6px;
@@ -91,7 +94,7 @@
       grid-template-columns: 1.6fr 0.9fr;
       gap:14px;
       align-items:start;
-      margin-bottom:8px;
+      margin-bottom:10px;
     }
     .step-card{
       border:1px solid var(--border);
@@ -163,9 +166,7 @@
       background:#f3f4f6;
       color:#111827;
     }
-    input.readonly[readonly]{
-      cursor:default;
-    }
+    input.readonly[readonly]{cursor:default;}
 
     .step1-body{display:grid;gap:12px;}
     .two-col{
@@ -174,21 +175,29 @@
       gap:12px;
     }
 
-    /* ★料率：入力欄の右にチップをコンパクト配置 */
+    /* 料率：入力欄の右にチップ（1行固定・横スクロール） */
     .rate-inline{
       display:grid;
-      grid-template-columns: 110px 1fr;
+      grid-template-columns: 120px 1fr;
       gap:10px;
       align-items:center;
     }
     .chips{
       display:flex;
       gap:6px;
-      flex-wrap:wrap;
-      justify-content:flex-start;
-      align-items:center;
+      flex-wrap:nowrap;          /* 1行固定 */
+      overflow-x:auto;           /* 横スクロール */
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      padding:2px 0;
+      scrollbar-width:thin;
     }
+    .chips::-webkit-scrollbar{height:8px;}
+    .chips::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:999px;}
+    .chips::-webkit-scrollbar-track{background:transparent;}
+
     .chip{
+      flex:0 0 auto;             /* 縮まない */
       border:1px solid var(--border);
       background:var(--chip-bg);
       color:#111827;
@@ -211,6 +220,7 @@
       color:var(--brand-dark);
     }
 
+    /* 右側：STEP2→3→4 を縦並び */
     .button-row{
       display:flex;
       flex-direction:column;
@@ -246,7 +256,7 @@
 
     .check-label{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       gap:8px;
       cursor:pointer;
       font-size:0.9rem;
@@ -262,11 +272,45 @@
       font-size:0.78rem;
       font-weight:500;
       margin-top:2px;
+      line-height:1.35;
     }
     .check-label input[type="checkbox"]{
+      margin-top:2px;
       width:18px;height:18px;cursor:pointer;
       accent-color: var(--brand);
+      flex:0 0 auto;
     }
+
+    /* 集計後のレポート見出し（画面/印刷共通） */
+    .report-head{
+      display:none;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      margin:10px 0 8px;
+    }
+    .report-title{
+      font-weight:900;
+      font-size:1.02rem;
+      margin:0 0 4px;
+      color:#0f172a;
+    }
+    .report-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px 14px;
+      font-size:0.84rem;
+      color:#334155;
+    }
+    .meta-item{
+      display:flex;
+      gap:6px;
+      align-items:baseline;
+      white-space:nowrap;
+    }
+    .meta-key{color:var(--muted);}
+    .meta-val{font-weight:700;}
 
     .file-info{
       font-size:0.8rem;
@@ -279,6 +323,7 @@
       min-height:1.2em;
       margin-bottom:6px;
     }
+    .status.err{color:var(--danger);font-weight:700;}
     .summary{
       font-size:0.92rem;
       font-weight:700;
@@ -286,6 +331,7 @@
     }
     .summary .highlight{color:var(--brand-dark);}
 
+    /* 結果テーブル */
     .table-wrapper{
       max-height:520px;
       overflow:auto;
@@ -312,7 +358,7 @@
       vertical-align:middle;
     }
     th{
-      font-weight:700;
+      font-weight:800;
       color:#374151;
       white-space:nowrap;
     }
@@ -324,48 +370,83 @@
     tr:nth-child(even) td.detail-row-cell{background:#f9fafb;}
     .group-header td{
       background:var(--accent-soft);
-      font-weight:700;
+      font-weight:800;
       color:#1f2937;
       border-bottom:1px solid #d1d5db;
     }
     .group-header .label{opacity:0.9;}
     .subtotal-row td{
       background:var(--subtotal-bg);
-      font-weight:800;
+      font-weight:900;
       border-top:1px solid #eab308;
       border-bottom:1px solid #eab308;
     }
-    .subtotal-input{max-width:160px;font-size:0.8rem;}
+    .subtotal-input{
+      max-width:160px;
+      font-size:0.84rem;
+      padding:6px 8px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#fff;
+    }
+
+    /* 該当無しメッセージ（印刷も可能） */
+    .no-match{
+      display:none;
+      margin-top:10px;
+      padding:12px;
+      border-radius:12px;
+      border:1px dashed #cbd5e1;
+      background:#ffffff;
+      color:#334155;
+      font-weight:800;
+    }
+
     .note{
       font-size:0.8rem;
       color:var(--muted);
       margin-top:10px;
-      line-height:1.5;
+      line-height:1.55;
     }
 
     @media (max-width: 860px){
       .workflow-grid{grid-template-columns: 1fr;}
       .two-col{grid-template-columns:1fr;}
       .step-desc{display:none;}
+      /* スマホでは入力の下にチップ（1行固定＋横スクロール） */
       .rate-inline{grid-template-columns: 1fr;}
     }
 
+    /* 印刷調整：改ページ後の被りを防ぐ（sticky解除＋ヘッダー繰り返し＋wrapper解除） */
     @media print{
       body{background:#fff;padding:0;}
-      .card{box-shadow:none;border-radius:0;}
+      .card{box-shadow:none;border-radius:0;padding:14px 16px;}
       .flow{display:none !important;}
-      input[type="file"]{display:none !important;}
-      .button-row button, .check-label{display:none !important;}
-      .table-wrapper{max-height:none;overflow:visible;border:none;display:block !important;}
-      thead tr{position:static !important;}
+      form{display:none !important;}
+      .status, .file-info{display:none !important;}
+
+      .report-head{display:block !important; page-break-inside:avoid;}
+      .summary{margin-top:8px;}
+
+      .table-wrapper{
+        max-height:none !important;
+        overflow:visible !important;
+        border:none !important;
+        background:transparent !important;
+        display:block !important;
+      }
+      table{font-size:0.86rem;}
       thead{display:table-header-group;}
+      thead tr{position:static !important;}
       tfoot{display:table-footer-group;}
-      tr, td, th{page-break-inside:avoid;}
+      tr, td, th{page-break-inside:avoid; break-inside:avoid;}
+      .no-match{display:block !important; page-break-inside:avoid;}
     }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
+
 <body>
 <div class="shell">
   <div class="card">
@@ -386,7 +467,7 @@
 
     <form id="controlForm" onsubmit="return false;">
       <div class="workflow-grid">
-        <!-- 左：STEP1 -->
+        <!-- 左：STEP1（入力） -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP1</span>
@@ -402,11 +483,11 @@
 
             <div class="two-col">
               <div class="field">
-                <label for="year">対象年（西暦・自動）</label>
+                <label>対象年（自動）</label>
                 <input type="text" id="year" class="readonly" value="" readonly placeholder="ファイル名から自動取得" />
               </div>
               <div class="field">
-                <label for="month">対象月（自動）</label>
+                <label>対象月（自動）</label>
                 <input type="text" id="month" class="readonly" value="" readonly placeholder="ファイル名から自動取得" />
               </div>
             </div>
@@ -415,7 +496,7 @@
               <label for="ratePct">料率（%）</label>
               <div class="rate-inline">
                 <input type="number" id="ratePct" value="10" min="0" max="100" step="0.1" />
-                <div class="chips" id="rateChips" aria-label="料率チップ">
+                <div class="chips" id="rateChips" aria-label="料率チップ（横スクロール）">
                   <button type="button" class="chip active" data-rate="10">10%</button>
                   <button type="button" class="chip" data-rate="15">15%</button>
                   <button type="button" class="chip" data-rate="20">20%</button>
@@ -427,7 +508,7 @@
           </div>
         </section>
 
-        <!-- 右：STEP2-4 -->
+        <!-- 右：STEP2-4（操作） -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP2-4</span>
@@ -442,7 +523,7 @@
               <input type="checkbox" id="manualCheck" />
               <div>
                 <div><strong>STEP3 目視確認済み</strong></div>
-                <small>チェックが無い場合、PDF/印刷はできません</small>
+                <small>集計結果を確認した後にチェックしてください（チェックが無い場合、PDF/印刷はできません）</small>
               </div>
             </label>
 
@@ -454,7 +535,20 @@
 
     <div id="fileInfo" class="file-info"></div>
     <div id="status" class="status"></div>
+
+    <!-- 印刷時に「読込ファイル名」を明示するためのレポートヘッダ -->
+    <div class="report-head" id="reportHead">
+      <div class="report-title" id="reportTitle"></div>
+      <div class="report-meta">
+        <div class="meta-item"><span class="meta-key">読込ファイル:</span><span class="meta-val" id="metaFile"></span></div>
+        <div class="meta-item"><span class="meta-key">料率:</span><span class="meta-val" id="metaRate"></span></div>
+        <div class="meta-item"><span class="meta-key">シート:</span><span class="meta-val">代理店報酬明細書(詳細)</span></div>
+      </div>
+    </div>
+
     <div id="summary" class="summary"></div>
+
+    <div class="no-match" id="noMatchBox">該当無し（対象条件に一致する行はありません）</div>
 
     <div class="table-wrapper" id="tableWrapper" style="display:none;">
       <table id="resultTable">
@@ -474,15 +568,23 @@
 
     <div class="note">
       ・対象年月は、ファイル名 <strong>9998974_YYYYMM.xlsx</strong> の YYYY/MM から自動取得します（入力不可）。<br />
-      ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
-      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 料率（%/100）（円未満切捨て）で計算しています。<br />
-      ・契約者ごとに小計行を表示し、小計行に担当者名を入力できます（印刷・PDF にも反映されます）。<br />
+      ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象とします。<br />
+      ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 料率（%/100）（円未満切捨て）で計算します。<br />
+      ・契約者ごとに小計行を表示し、小計行に担当者名を入力できます（印刷・PDF にも反映）。<br />
       ・該当無しの場合でも、「目視確認済み」にチェックした上で PDF/印刷が可能です。
     </div>
   </div>
 </div>
 
 <script>
+  function normalizeHeader(s){
+    return String(s ?? "")
+      .replace(/\s+/g, "")
+      .replace(/[‐-‒–—―－]/g, "-")
+      .replace(/[（）()]/g, "")
+      .trim();
+  }
+
   function parseAmount(val) {
     if (val == null) return 0;
     if (typeof val === "number") return Math.floor(val);
@@ -494,8 +596,15 @@
     const keys = Object.keys(sampleRow || {});
     const includes = Array.isArray(includeKeywords) ? includeKeywords : [includeKeywords];
     const excludes = Array.isArray(excludeKeywords) ? excludeKeywords : (excludeKeywords ? [excludeKeywords] : []);
+
+    const incN = includes.map(normalizeHeader);
+    const excN = excludes.map(normalizeHeader);
+
     for (const key of keys) {
-      if (includes.every(k => key.includes(k)) && excludes.every(k => !key.includes(k))) return key;
+      const kN = normalizeHeader(key);
+      const okInc = incN.every(t => kN.includes(t));
+      const okExc = excN.every(t => !kN.includes(t));
+      if (okInc && okExc) return key;
     }
     return null;
   }
@@ -503,15 +612,14 @@
   function normalizeNyukin(val) {
     if (val == null) return "";
     let s = String(val);
-    s = s.replace("－", "-");
+    s = s.replace(/[‐-‒–—―－]/g, "-");
     s = s.replace(/\s+/g, "");
     return s;
   }
 
   function parseYearMonthFromFilename(fileName) {
     if (!fileName) return null;
-
-    // 9998974_202512.xlsx などを想定（拡張子直前のYYYYMM）
+    // 9998974_202512.xlsx / _YYYYMM / 末尾YYYYMM などを許容
     let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
     if (!match) match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
     if (!match) return null;
@@ -541,22 +649,48 @@
     const rateInput      = document.getElementById("ratePct");
     const chipsWrap      = document.getElementById("rateChips");
 
+    const reportHead     = document.getElementById("reportHead");
+    const reportTitle    = document.getElementById("reportTitle");
+    const metaFile       = document.getElementById("metaFile");
+    const metaRate       = document.getElementById("metaRate");
+    const noMatchBox     = document.getElementById("noMatchBox");
+
     let hasAggregated = false;
     let aggregateGen  = 0;
     let confirmedGen  = 0;
 
-    function setStatus(msg) { statusEl.textContent = msg || ""; }
+    function setStatus(msg, isErr=false) {
+      statusEl.textContent = msg || "";
+      statusEl.classList.toggle("err", !!isErr);
+    }
+
+    function syncActiveChip() {
+      const current = parseFloat(rateInput.value);
+      const chips = chipsWrap.querySelectorAll(".chip");
+      chips.forEach(btn => {
+        const r = parseFloat(btn.dataset.rate);
+        btn.classList.toggle("active", Number.isFinite(current) && Number.isFinite(r) && current === r);
+      });
+    }
+
+    chipsWrap.addEventListener("click", (ev) => {
+      const btn = ev.target.closest(".chip");
+      if (!btn) return;
+      rateInput.value = btn.dataset.rate;
+      syncActiveChip();
+    });
+    rateInput.addEventListener("input", syncActiveChip);
 
     function updateYearMonthUI(fileName) {
       const ym = parseYearMonthFromFilename(fileName);
       if (!ym) {
         yearInput.value = "";
         monthInput.value = "";
-        return false;
+        return null;
       }
       yearInput.value = String(ym.year);
       monthInput.value = String(ym.month);
-      return true;
+      return ym;
     }
 
     function updateFileInfo() {
@@ -572,36 +706,27 @@
     }
     fileInput.addEventListener("change", updateFileInfo);
 
-    function syncActiveChip() {
-      const current = parseFloat(rateInput.value);
-      const chips = chipsWrap.querySelectorAll(".chip");
-      chips.forEach(btn => {
-        const r = parseFloat(btn.dataset.rate);
-        btn.classList.toggle("active", Number.isFinite(current) && Number.isFinite(r) && current === r);
-      });
-    }
-    chipsWrap.addEventListener("click", (ev) => {
-      const btn = ev.target.closest(".chip");
-      if (!btn) return;
-      rateInput.value = btn.dataset.rate;
-      syncActiveChip();
-    });
-    rateInput.addEventListener("input", syncActiveChip);
-
     manualCheck.addEventListener("change", () => {
       if (manualCheck.checked && hasAggregated) confirmedGen = aggregateGen;
       else confirmedGen = 0;
     });
 
+    function updateReportHead({year, month, ratePct, fileName}) {
+      reportTitle.textContent = `${year}年${month}月分 企業防衛推進手当 明細`;
+      metaFile.textContent = fileName || "-";
+      metaRate.textContent = `${ratePct}%`;
+      reportHead.style.display = "block";
+    }
+
     printBtn.addEventListener("click", () => {
-      if (!hasAggregated) { setStatus("先に STEP2「集計する」を実行してください。"); return; }
-      if (!manualCheck.checked) { setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。"); return; }
-      if (confirmedGen !== aggregateGen) { setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。"); return; }
+      if (!hasAggregated) { setStatus("先に STEP2「集計する」を実行してください。", true); return; }
+      if (!manualCheck.checked) { setStatus("STEP3「目視確認済み」にチェックを入れてから、STEP4「PDF/印刷」を行ってください。", true); return; }
+      if (confirmedGen !== aggregateGen) { setStatus("最新の集計結果について、改めて「目視確認済み」にチェックを入れてください。", true); return; }
 
       setStatus("");
 
+      // PDF保存時のファイル名候補（Chrome等ではタイトルが初期値になりやすい）
       const originalTitle = document.title;
-
       const yearVal = yearInput.value.trim();
       const monthVal = monthInput.value.trim();
       const monthNum = parseInt(monthVal, 10);
@@ -618,29 +743,35 @@
     });
 
     runBtn.addEventListener("click", () => {
-      const file  = fileInput.files[0];
+      const file = fileInput.files[0];
 
+      // 表示クリア
+      summaryEl.textContent = "";
+      tbodyEl.innerHTML = "";
+      tableWrapperEl.style.display = "none";
+      noMatchBox.style.display = "none";
+      reportHead.style.display = "none";
+
+      if (!file) { setStatus("xlsx ファイルを選択してください。", true); return; }
+
+      // 対象年月はファイル名から必須取得（入力不可）
+      const ym = updateYearMonthUI(file.name);
+      if (!ym) {
+        setStatus("対象年月をファイル名から取得できません。ファイル名を「9998974_YYYYMM.xlsx」の形式にしてください。", true);
+        return;
+      }
+
+      // 料率
       const ratePct = parseFloat(rateInput.value);
       if (!Number.isFinite(ratePct) || ratePct < 0 || ratePct > 100) {
-        setStatus("料率（%）は 0〜100 の範囲で入力してください。");
+        setStatus("料率（%）は 0〜100 の範囲で入力してください。", true);
         return;
       }
       const rate = ratePct / 100;
 
-      summaryEl.textContent = "";
-      tbodyEl.innerHTML = "";
-      tableWrapperEl.style.display = "none";
-
-      if (!file) { setStatus("xlsx ファイルを選択してください。"); return; }
-
-      // ★対象年/月はファイル名から必須取得
-      const ym = parseYearMonthFromFilename(file.name);
-      if (!ym) {
-        setStatus("対象年月をファイル名から取得できません。ファイル名を「9998974_YYYYMM.xlsx」の形式にしてください。");
-        return;
-      }
-      yearInput.value = String(ym.year);
-      monthInput.value = String(ym.month);
+      // 集計→チェック→印刷の導線を明確化（集計したらチェックはやり直し）
+      manualCheck.checked = false;
+      confirmedGen = 0;
 
       updateFileInfo();
       setStatus("ファイルを読み込んでいます…");
@@ -652,29 +783,30 @@
           const data     = new Uint8Array(e.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          const targetSheetName = workbook.SheetNames.find(name => name === "代理店報酬明細書(詳細)");
+          const targetSheetName = workbook.SheetNames.find(n => n === "代理店報酬明細書(詳細)");
           if (!targetSheetName) {
-            setStatus("ブック内に「代理店報酬明細書(詳細)」シートが見つかりません。シート名をご確認ください。");
-            runBtn.disabled = false;
+            setStatus("ブック内に「代理店報酬明細書(詳細)」シートが見つかりません。シート名をご確認ください。", true);
             return;
           }
 
           const sheet = workbook.Sheets[targetSheetName];
           const json  = XLSX.utils.sheet_to_json(sheet, { defval: "" });
           if (!json.length) {
-            setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。");
-            runBtn.disabled = false;
+            setStatus("「代理店報酬明細書(詳細)」シート内にデータがありません。", true);
             return;
           }
 
           const sampleRow   = json[0];
           const contractKey = findColumnKey(sampleRow, "契約者名") || "契約者名";
-          const seisekiKey  = findColumnKey(sampleRow, "成績")    || "成績";
+          const seisekiKey  = findColumnKey(sampleRow, "成績") || "成績";
           const nyukinKey   = findColumnKey(sampleRow, "入金回数") || "入金回数";
-          const rewardKey   =
-            findColumnKey(sampleRow, ["報酬"], ["計算用"]) ||
+
+          // 報酬列：一般的には「報酬（円）」等。念のため「企業防衛推進手当」は除外。
+          const rewardKey =
+            findColumnKey(sampleRow, ["報酬"], ["企業防衛"]) ||
             findColumnKey(sampleRow, "報酬") || "報酬";
 
+          // 抽出
           const rows = [];
           for (const row of json) {
             const seiseki   = String(row[seisekiKey] || "");
@@ -690,6 +822,24 @@
             rows.push({ contractor: contractorName, seiseki, nyukin: nyukinRaw, firstReward, bonus });
           }
 
+          // レポートヘッダ更新（印刷時にファイル名明示）
+          updateReportHead({ year: ym.year, month: ym.month, ratePct, fileName: file.name });
+
+          // 集計・表示
+          hasAggregated = true;
+          aggregateGen += 1;
+
+          if (!rows.length) {
+            tableWrapperEl.style.display = "none";
+            noMatchBox.style.display = "block";
+            summaryEl.innerHTML =
+              `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当（料率 ${ratePct}%）：</span>` +
+              `該当無し`;
+
+            setStatus("集計が完了しました（該当無し）。STEP3 で「目視確認済み」にチェックを入れると、STEP4 で PDF/印刷が可能です。");
+            return;
+          }
+
           let totalBonus = 0;
           const groups = {};
           rows.forEach(r => {
@@ -700,20 +850,8 @@
             totalBonus += r.bonus;
           });
 
+          const contractorNames = Object.keys(groups).sort((a,b)=>a.localeCompare(b,"ja"));
           tbodyEl.innerHTML = "";
-
-          if (!rows.length) {
-            tableWrapperEl.style.display = "none";
-            hasAggregated = true;
-            aggregateGen += 1;
-            confirmedGen = 0;
-            setStatus("集計が完了しました（該当する初年度第1回報酬はありません）。STEP3 で「目視確認済み」にチェックを入れると、STEP4 で PDF/印刷が可能です。");
-            summaryEl.textContent = "該当無し";
-            runBtn.disabled = false;
-            return;
-          }
-
-          const contractorNames = Object.keys(groups).sort((a, b) => a.localeCompare(b, "ja"));
 
           contractorNames.forEach(contractorName => {
             const group = groups[contractorName];
@@ -734,9 +872,9 @@
               tdName.textContent = r.contractor;
               tr.appendChild(tdName);
 
-              const tdTantou = document.createElement("td");
-              tdTantou.className = "detail-row-cell";
-              tr.appendChild(tdTantou);
+              const tdTantouBlank = document.createElement("td");
+              tdTantouBlank.className = "detail-row-cell";
+              tr.appendChild(tdTantouBlank);
 
               const tdSeiseki = document.createElement("td");
               tdSeiseki.className = "detail-row-cell";
@@ -779,9 +917,9 @@
             subtotalTr.appendChild(document.createElement("td"));
             subtotalTr.appendChild(document.createElement("td"));
 
-            const tdBlank3 = document.createElement("td");
-            tdBlank3.className = "num";
-            subtotalTr.appendChild(tdBlank3);
+            const tdBlank = document.createElement("td");
+            tdBlank.className = "num";
+            subtotalTr.appendChild(tdBlank);
 
             const tdSubtotalValue = document.createElement("td");
             tdSubtotalValue.className = "num";
@@ -792,34 +930,34 @@
           });
 
           tableWrapperEl.style.display = "block";
-          hasAggregated = true;
-          aggregateGen += 1;
-          confirmedGen = 0;
-
-          setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
+          noMatchBox.style.display = "none";
 
           summaryEl.innerHTML =
             `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当 合計（料率 ${ratePct}%）：</span>` +
             `${totalBonus.toLocaleString("ja-JP")}円`;
 
+          setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
+
         } catch (err) {
           console.error(err);
-          setStatus("xlsx の解析中にエラーが発生しました。ヘッダー名やシート名をご確認ください。");
+          setStatus("xlsx の解析中にエラーが発生しました。ヘッダー名やシート名をご確認ください。", true);
         } finally {
           runBtn.disabled = false;
         }
       };
 
       reader.onerror = () => {
-        setStatus("ファイル読み込みに失敗しました。");
+        setStatus("ファイル読み込みに失敗しました。", true);
         runBtn.disabled = false;
       };
 
       reader.readAsArrayBuffer(file);
     });
 
-    // 初期同期
+    // 初期状態
+    setStatus("");
     syncActiveChip();
+    updateFileInfo();
   })();
 </script>
 </body>
