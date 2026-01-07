@@ -175,41 +175,34 @@
       gap:12px;
     }
 
-    /* 料率：入力欄の右にチップ（1行固定・横スクロール） */
+    /* 料率：入力欄の右にチップ（1行固定・スクロールなし・一覧表示） */
     .rate-inline{
       display:grid;
-      grid-template-columns: 120px 1fr;
-      gap:10px;
+      grid-template-columns: 96px 1fr; /* 入力欄を少し細くしてチップ側を広く */
+      gap:8px;
       align-items:center;
     }
     .chips{
       display:flex;
-      gap:6px;
-      flex-wrap:nowrap;          /* 1行固定 */
-      overflow-x:auto;           /* 横スクロール */
-      overflow-y:hidden;
-      -webkit-overflow-scrolling:touch;
-      padding:2px 0;
-      scrollbar-width:thin;
+      gap:4px;              /* 余白を詰める */
+      flex-wrap:nowrap;     /* 1行固定 */
+      overflow:visible;     /* スクロールしない */
     }
-    .chips::-webkit-scrollbar{height:8px;}
-    .chips::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:999px;}
-    .chips::-webkit-scrollbar-track{background:transparent;}
-
     .chip{
-      flex:0 0 auto;             /* 縮まない */
+      flex:1 1 0;           /* ★均等割り＆縮める */
+      min-width:0;          /* ★縮小を許可（重要） */
       border:1px solid var(--border);
       background:var(--chip-bg);
       color:#111827;
       border-radius:999px;
-      padding:6px 10px;
-      font-size:0.82rem;
+      padding:5px 6px;      /* ★左右を狭く */
+      font-size:0.78rem;    /* ★少し小さく */
       line-height:1;
       cursor:pointer;
       user-select:none;
-      box-shadow:0 2px 6px rgba(148,163,184,0.18);
-      min-width:54px;
+      box-shadow:0 2px 6px rgba(148,163,184,0.14);
       text-align:center;
+      white-space:nowrap;
     }
     .chip:hover{background:#e5e7eb;}
     .chip.active{
@@ -413,8 +406,12 @@
       .workflow-grid{grid-template-columns: 1fr;}
       .two-col{grid-template-columns:1fr;}
       .step-desc{display:none;}
-      /* スマホでは入力の下にチップ（1行固定＋横スクロール） */
+      /* スマホでは入力の下にチップ（1行固定・スクロールなし） */
       .rate-inline{grid-template-columns: 1fr;}
+    }
+    @media (max-width: 420px){
+      .rate-inline{grid-template-columns: 88px 1fr;}
+      .chip{padding:4px 4px;font-size:0.74rem;}
     }
 
     /* 印刷調整：改ページ後の被りを防ぐ（sticky解除＋ヘッダー繰り返し＋wrapper解除） */
@@ -496,7 +493,7 @@
               <label for="ratePct">料率（%）</label>
               <div class="rate-inline">
                 <input type="number" id="ratePct" value="10" min="0" max="100" step="0.1" />
-                <div class="chips" id="rateChips" aria-label="料率チップ（横スクロール）">
+                <div class="chips" id="rateChips" aria-label="料率チップ（1行固定・一覧表示）">
                   <button type="button" class="chip active" data-rate="10">10%</button>
                   <button type="button" class="chip" data-rate="15">15%</button>
                   <button type="button" class="chip" data-rate="20">20%</button>
@@ -769,7 +766,7 @@
       }
       const rate = ratePct / 100;
 
-      // 集計→チェック→印刷の導線を明確化（集計したらチェックはやり直し）
+      // 集計→チェック→印刷の導線（集計したらチェックはやり直し）
       manualCheck.checked = false;
       confirmedGen = 0;
 
