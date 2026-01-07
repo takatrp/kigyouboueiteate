@@ -55,7 +55,6 @@
       margin-bottom:10px;
     }
 
-    /* フロー（上段） */
     .flow{
       display:flex;
       flex-wrap:wrap;
@@ -86,11 +85,10 @@
     }
     .flow-step .step-text{font-weight:500;}
 
-    /* ここが今回の変更点：左→右のワークフロー配置 */
     form{margin:0;}
     .workflow-grid{
       display:grid;
-      grid-template-columns: 1.6fr 0.9fr; /* 左（入力）を広く、右（操作）を狭め */
+      grid-template-columns: 1.6fr 0.9fr;
       gap:14px;
       align-items:start;
       margin-bottom:8px;
@@ -160,18 +158,13 @@
       background:#fff;
     }
 
-    /* STEP1 内の配置（ファイル→年月→料率） */
-    .step1-body{
-      display:grid;
-      gap:12px;
-    }
+    .step1-body{display:grid;gap:12px;}
     .two-col{
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:12px;
     }
 
-    /* 料率チップ */
     .rate-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
     .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
     .chip{
@@ -194,7 +187,6 @@
       color:var(--brand-dark);
     }
 
-    /* 右側：STEP2→STEP3→STEP4 を縦並び */
     .button-row{
       display:flex;
       flex-direction:column;
@@ -270,13 +262,13 @@
     }
     .summary .highlight{color:var(--brand-dark);}
 
+    /* ★修正：display:none をCSSから外す（表示制御はJSでblock/none） */
     .table-wrapper{
       max-height:520px;
       overflow:auto;
       border-radius:10px;
       border:1px solid var(--border);
       background:#f9fafb;
-      display:none;
     }
     table{
       width:100%;
@@ -370,7 +362,6 @@
 
     <form id="controlForm" onsubmit="return false;">
       <div class="workflow-grid">
-        <!-- 左：STEP1（Excel入力を左側へ） -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP1</span>
@@ -411,7 +402,6 @@
           </div>
         </section>
 
-        <!-- 右：STEP2-4 -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP2-4</span>
@@ -440,7 +430,8 @@
     <div id="status" class="status"></div>
     <div id="summary" class="summary"></div>
 
-    <div class="table-wrapper" id="tableWrapper">
+    <!-- ★修正：初期状態はHTML側で非表示（JSでblockにする） -->
+    <div class="table-wrapper" id="tableWrapper" style="display:none;">
       <table id="resultTable">
         <thead>
           <tr>
@@ -594,7 +585,7 @@
 
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
-      tableWrapperEl.style.display = "none";
+      tableWrapperEl.style.display = "none"; // ★ここは明示
 
       if (!file) { setStatus("xlsx ファイルを選択してください。"); return; }
       if (!year || !month) { setStatus("対象年と対象月を入力（または自動設定）してください。"); return; }
@@ -655,7 +646,6 @@
 
           let totalBonus = 0;
           const groups = {};
-
           rows.forEach(r => {
             const key = r.contractor || "(契約者名なし)";
             if (!groups[key]) groups[key] = { details: [], subtotal: 0 };
@@ -755,7 +745,7 @@
             tbodyEl.appendChild(subtotalTr);
           });
 
-          tableWrapperEl.style.display = "";
+          tableWrapperEl.style.display = "block"; // ★ここが重要：必ずblockで表示
           hasAggregated = true;
           aggregateGen += 1;
           confirmedGen = 0;
@@ -782,7 +772,6 @@
       reader.readAsArrayBuffer(file);
     });
 
-    // 初期同期
     syncActiveChip();
   })();
 </script>
