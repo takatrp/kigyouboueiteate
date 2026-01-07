@@ -158,6 +158,15 @@
       background:#fff;
     }
 
+    /* 対象年/月は自動表示（入力不可） */
+    input.readonly{
+      background:#f3f4f6;
+      color:#111827;
+    }
+    input.readonly[readonly]{
+      cursor:default;
+    }
+
     .step1-body{display:grid;gap:12px;}
     .two-col{
       display:grid;
@@ -165,8 +174,20 @@
       gap:12px;
     }
 
-    .rate-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-    .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+    /* ★料率：入力欄の右にチップをコンパクト配置 */
+    .rate-inline{
+      display:grid;
+      grid-template-columns: 110px 1fr;
+      gap:10px;
+      align-items:center;
+    }
+    .chips{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-start;
+      align-items:center;
+    }
     .chip{
       border:1px solid var(--border);
       background:var(--chip-bg);
@@ -174,16 +195,19 @@
       border-radius:999px;
       padding:6px 10px;
       font-size:0.82rem;
+      line-height:1;
       cursor:pointer;
       user-select:none;
-      box-shadow:0 2px 6px rgba(148,163,184,0.25);
+      box-shadow:0 2px 6px rgba(148,163,184,0.18);
+      min-width:54px;
+      text-align:center;
     }
     .chip:hover{background:#e5e7eb;}
     .chip.active{
       border-color:rgba(87,136,153,0.7);
       background:var(--chip-bg-active);
-      box-shadow:0 6px 14px rgba(87,136,153,0.20);
-      font-weight:700;
+      box-shadow:0 6px 14px rgba(87,136,153,0.18);
+      font-weight:800;
       color:var(--brand-dark);
     }
 
@@ -262,7 +286,6 @@
     }
     .summary .highlight{color:var(--brand-dark);}
 
-    /* ★修正：display:none をCSSから外す（表示制御はJSでblock/none） */
     .table-wrapper{
       max-height:520px;
       overflow:auto;
@@ -324,6 +347,7 @@
       .workflow-grid{grid-template-columns: 1fr;}
       .two-col{grid-template-columns:1fr;}
       .step-desc{display:none;}
+      .rate-inline{grid-template-columns: 1fr;}
     }
 
     @media print{
@@ -362,6 +386,7 @@
 
     <form id="controlForm" onsubmit="return false;">
       <div class="workflow-grid">
+        <!-- 左：STEP1 -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP1</span>
@@ -377,31 +402,32 @@
 
             <div class="two-col">
               <div class="field">
-                <label for="year">対象年（西暦）</label>
-                <input type="number" id="year" value="2025" min="2000" max="2100" />
+                <label for="year">対象年（西暦・自動）</label>
+                <input type="text" id="year" class="readonly" value="" readonly placeholder="ファイル名から自動取得" />
               </div>
               <div class="field">
-                <label for="month">対象月</label>
-                <input type="number" id="month" value="3" min="1" max="12" />
+                <label for="month">対象月（自動）</label>
+                <input type="text" id="month" class="readonly" value="" readonly placeholder="ファイル名から自動取得" />
               </div>
             </div>
 
             <div class="field">
               <label for="ratePct">料率（%）</label>
-              <div class="rate-row">
+              <div class="rate-inline">
                 <input type="number" id="ratePct" value="10" min="0" max="100" step="0.1" />
-              </div>
-              <div class="chips" id="rateChips">
-                <button type="button" class="chip active" data-rate="10">10%</button>
-                <button type="button" class="chip" data-rate="15">15%</button>
-                <button type="button" class="chip" data-rate="20">20%</button>
-                <button type="button" class="chip" data-rate="25">25%</button>
-                <button type="button" class="chip" data-rate="30">30%</button>
+                <div class="chips" id="rateChips" aria-label="料率チップ">
+                  <button type="button" class="chip active" data-rate="10">10%</button>
+                  <button type="button" class="chip" data-rate="15">15%</button>
+                  <button type="button" class="chip" data-rate="20">20%</button>
+                  <button type="button" class="chip" data-rate="25">25%</button>
+                  <button type="button" class="chip" data-rate="30">30%</button>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
+        <!-- 右：STEP2-4 -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP2-4</span>
@@ -430,7 +456,6 @@
     <div id="status" class="status"></div>
     <div id="summary" class="summary"></div>
 
-    <!-- ★修正：初期状態はHTML側で非表示（JSでblockにする） -->
     <div class="table-wrapper" id="tableWrapper" style="display:none;">
       <table id="resultTable">
         <thead>
@@ -448,6 +473,7 @@
     </div>
 
     <div class="note">
+      ・対象年月は、ファイル名 <strong>9998974_YYYYMM.xlsx</strong> の YYYY/MM から自動取得します（入力不可）。<br />
       ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象としています。<br />
       ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 料率（%/100）（円未満切捨て）で計算しています。<br />
       ・契約者ごとに小計行を表示し、小計行に担当者名を入力できます（印刷・PDF にも反映されます）。<br />
@@ -482,6 +508,24 @@
     return s;
   }
 
+  function parseYearMonthFromFilename(fileName) {
+    if (!fileName) return null;
+
+    // 9998974_202512.xlsx などを想定（拡張子直前のYYYYMM）
+    let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
+    if (!match) match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
+    if (!match) return null;
+
+    const yyyymm = match[1];
+    const yearNum  = parseInt(yyyymm.slice(0, 4), 10);
+    const monthNum = parseInt(yyyymm.slice(4, 6), 10);
+
+    if (!Number.isFinite(yearNum) || yearNum < 2000 || yearNum > 2100) return null;
+    if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) return null;
+
+    return { year: yearNum, month: monthNum };
+  }
+
   (function init() {
     const statusEl       = document.getElementById("status");
     const summaryEl      = document.getElementById("summary");
@@ -503,27 +547,27 @@
 
     function setStatus(msg) { statusEl.textContent = msg || ""; }
 
-    function autoFillYearMonthFromFilename(fileName) {
-      if (!fileName) return;
-      let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
-      if (!match) match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
-      if (!match) return;
-
-      const yyyymm = match[1];
-      const yearNum  = parseInt(yyyymm.slice(0, 4), 10);
-      const monthNum = parseInt(yyyymm.slice(4, 6), 10);
-
-      if (Number.isFinite(yearNum) && yearNum >= 2000 && yearNum <= 2100) yearInput.value = yearNum;
-      if (Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) monthInput.value = monthNum;
+    function updateYearMonthUI(fileName) {
+      const ym = parseYearMonthFromFilename(fileName);
+      if (!ym) {
+        yearInput.value = "";
+        monthInput.value = "";
+        return false;
+      }
+      yearInput.value = String(ym.year);
+      monthInput.value = String(ym.month);
+      return true;
     }
 
     function updateFileInfo() {
       const file = fileInput.files[0];
       if (file) {
         fileInfoEl.textContent = "読込ファイル：" + file.name;
-        autoFillYearMonthFromFilename(file.name);
+        updateYearMonthUI(file.name);
       } else {
         fileInfoEl.textContent = "";
+        yearInput.value = "";
+        monthInput.value = "";
       }
     }
     fileInput.addEventListener("change", updateFileInfo);
@@ -557,8 +601,10 @@
       setStatus("");
 
       const originalTitle = document.title;
-      const yearVal  = yearInput.value.trim();
-      const monthNum = parseInt(monthInput.value.trim(), 10);
+
+      const yearVal = yearInput.value.trim();
+      const monthVal = monthInput.value.trim();
+      const monthNum = parseInt(monthVal, 10);
 
       let newTitle = originalTitle;
       if (yearVal && Number.isFinite(monthNum) && monthNum >= 1 && monthNum <= 12) {
@@ -572,8 +618,6 @@
     });
 
     runBtn.addEventListener("click", () => {
-      const year  = yearInput.value.trim();
-      const month = monthInput.value.trim();
       const file  = fileInput.files[0];
 
       const ratePct = parseFloat(rateInput.value);
@@ -585,16 +629,18 @@
 
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
-      tableWrapperEl.style.display = "none"; // ★ここは明示
+      tableWrapperEl.style.display = "none";
 
       if (!file) { setStatus("xlsx ファイルを選択してください。"); return; }
-      if (!year || !month) { setStatus("対象年と対象月を入力（または自動設定）してください。"); return; }
 
-      const monthNum = parseInt(month, 10);
-      if (!Number.isFinite(monthNum) || monthNum < 1 || monthNum > 12) {
-        setStatus("対象月は 1〜12 の範囲で入力してください。");
+      // ★対象年/月はファイル名から必須取得
+      const ym = parseYearMonthFromFilename(file.name);
+      if (!ym) {
+        setStatus("対象年月をファイル名から取得できません。ファイル名を「9998974_YYYYMM.xlsx」の形式にしてください。");
         return;
       }
+      yearInput.value = String(ym.year);
+      monthInput.value = String(ym.month);
 
       updateFileInfo();
       setStatus("ファイルを読み込んでいます…");
@@ -745,7 +791,7 @@
             tbodyEl.appendChild(subtotalTr);
           });
 
-          tableWrapperEl.style.display = "block"; // ★ここが重要：必ずblockで表示
+          tableWrapperEl.style.display = "block";
           hasAggregated = true;
           aggregateGen += 1;
           confirmedGen = 0;
@@ -753,7 +799,7 @@
           setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
 
           summaryEl.innerHTML =
-            `<span class="highlight">${year}年${monthNum}月分企業防衛推進手当 合計（料率 ${ratePct}%）：</span>` +
+            `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当 合計（料率 ${ratePct}%）：</span>` +
             `${totalBonus.toLocaleString("ja-JP")}円`;
 
         } catch (err) {
@@ -772,6 +818,7 @@
       reader.readAsArrayBuffer(file);
     });
 
+    // 初期同期
     syncActiveChip();
   })();
 </script>
