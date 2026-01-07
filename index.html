@@ -128,13 +128,8 @@
       color:#111827;
       font-size:0.92rem;
     }
-    .step-desc{
-      margin-left:auto;
-      color:var(--muted);
-      font-size:0.78rem;
-      font-weight:500;
-      white-space:nowrap;
-    }
+    /* ★STEP1/STEP2-4の補足文（右寄せ）を削除するため、表示しない */
+    .step-desc{display:none;}
 
     .field{
       display:flex;
@@ -178,25 +173,25 @@
     /* 料率：入力欄の右にチップ（1行固定・スクロールなし・一覧表示） */
     .rate-inline{
       display:grid;
-      grid-template-columns: 96px 1fr; /* 入力欄を少し細くしてチップ側を広く */
+      grid-template-columns: 96px 1fr;
       gap:8px;
       align-items:center;
     }
     .chips{
       display:flex;
-      gap:4px;              /* 余白を詰める */
-      flex-wrap:nowrap;     /* 1行固定 */
-      overflow:visible;     /* スクロールしない */
+      gap:4px;
+      flex-wrap:nowrap;
+      overflow:visible;
     }
     .chip{
-      flex:1 1 0;           /* ★均等割り＆縮める */
-      min-width:0;          /* ★縮小を許可（重要） */
+      flex:1 1 0;
+      min-width:0;
       border:1px solid var(--border);
       background:var(--chip-bg);
       color:#111827;
       border-radius:999px;
-      padding:5px 6px;      /* ★左右を狭く */
-      font-size:0.78rem;    /* ★少し小さく */
+      padding:5px 6px;
+      font-size:0.78rem;
       line-height:1;
       cursor:pointer;
       user-select:none;
@@ -405,7 +400,6 @@
     @media (max-width: 860px){
       .workflow-grid{grid-template-columns: 1fr;}
       .two-col{grid-template-columns:1fr;}
-      .step-desc{display:none;}
       /* スマホでは入力の下にチップ（1行固定・スクロールなし） */
       .rate-inline{grid-template-columns: 1fr;}
     }
@@ -469,7 +463,6 @@
           <div class="step-card-head">
             <span class="step-pill">STEP1</span>
             <div class="step-title">入力（Excel・対象年月・料率）</div>
-            <div class="step-desc">左→右で作業</div>
           </div>
 
           <div class="step1-body">
@@ -510,7 +503,6 @@
           <div class="step-card-head">
             <span class="step-pill">STEP2-4</span>
             <div class="step-title">集計・確認・印刷</div>
-            <div class="step-desc">上→下で実行</div>
           </div>
 
           <div class="button-row">
@@ -564,7 +556,7 @@
     </div>
 
     <div class="note">
-      ・対象年月は、ファイル名 <strong>9998974_YYYYMM.xlsx</strong> の YYYY/MM から自動取得します（入力不可）。<br />
+      ・対象年月は、ファイル名から自動取得します（入力不可）。<br />
       ・成績列に「初年度」を含み、かつ入金回数が「1」または「1-1」の行のみを対象とします。<br />
       ・企業防衛推進手当 ＝ 初年度第1回報酬 × 12ヶ月 × 料率（%/100）（円未満切捨て）で計算します。<br />
       ・契約者ごとに小計行を表示し、小計行に担当者名を入力できます（印刷・PDF にも反映）。<br />
