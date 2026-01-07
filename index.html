@@ -128,7 +128,6 @@
       color:#111827;
       font-size:0.92rem;
     }
-    /* ★STEP1/STEP2-4の補足文（右寄せ）を削除するため、表示しない */
     .step-desc{display:none;}
 
     .field{
@@ -156,7 +155,6 @@
       background:#fff;
     }
 
-    /* 対象年/月は自動表示（入力不可） */
     input.readonly{
       background:#f3f4f6;
       color:#111827;
@@ -170,7 +168,6 @@
       gap:12px;
     }
 
-    /* 料率：入力欄の右にチップ（1行固定・スクロールなし・一覧表示） */
     .rate-inline{
       display:grid;
       grid-template-columns: 96px 1fr;
@@ -208,7 +205,6 @@
       color:var(--brand-dark);
     }
 
-    /* 右側：STEP2→3→4 を縦並び */
     .button-row{
       display:flex;
       flex-direction:column;
@@ -269,7 +265,6 @@
       flex:0 0 auto;
     }
 
-    /* 集計後のレポート見出し（画面/印刷共通） */
     .report-head{
       display:none;
       border:1px solid var(--border);
@@ -310,6 +305,7 @@
       color:var(--muted);
       min-height:1.2em;
       margin-bottom:6px;
+      line-height:1.4;
     }
     .status.err{color:var(--danger);font-weight:700;}
     .summary{
@@ -319,7 +315,6 @@
     }
     .summary .highlight{color:var(--brand-dark);}
 
-    /* 結果テーブル */
     .table-wrapper{
       max-height:520px;
       overflow:auto;
@@ -378,7 +373,6 @@
       background:#fff;
     }
 
-    /* 該当無しメッセージ（印刷も可能） */
     .no-match{
       display:none;
       margin-top:10px;
@@ -400,7 +394,6 @@
     @media (max-width: 860px){
       .workflow-grid{grid-template-columns: 1fr;}
       .two-col{grid-template-columns:1fr;}
-      /* スマホでは入力の下にチップ（1行固定・スクロールなし） */
       .rate-inline{grid-template-columns: 1fr;}
     }
     @media (max-width: 420px){
@@ -408,7 +401,6 @@
       .chip{padding:4px 4px;font-size:0.74rem;}
     }
 
-    /* 印刷調整：改ページ後の被りを防ぐ（sticky解除＋ヘッダー繰り返し＋wrapper解除） */
     @media print{
       body{background:#fff;padding:0;}
       .card{box-shadow:none;border-radius:0;padding:14px 16px;}
@@ -429,7 +421,6 @@
       table{font-size:0.86rem;}
       thead{display:table-header-group;}
       thead tr{position:static !important;}
-      tfoot{display:table-footer-group;}
       tr, td, th{page-break-inside:avoid; break-inside:avoid;}
       .no-match{display:block !important; page-break-inside:avoid;}
     }
@@ -458,7 +449,6 @@
 
     <form id="controlForm" onsubmit="return false;">
       <div class="workflow-grid">
-        <!-- 左：STEP1（入力） -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP1</span>
@@ -498,7 +488,6 @@
           </div>
         </section>
 
-        <!-- 右：STEP2-4（操作） -->
         <section class="step-card">
           <div class="step-card-head">
             <span class="step-pill">STEP2-4</span>
@@ -525,7 +514,6 @@
     <div id="fileInfo" class="file-info"></div>
     <div id="status" class="status"></div>
 
-    <!-- 印刷時に「読込ファイル名」を明示するためのレポートヘッダ -->
     <div class="report-head" id="reportHead">
       <div class="report-title" id="reportTitle"></div>
       <div class="report-meta">
@@ -574,10 +562,21 @@
       .trim();
   }
 
+  // ★ 金額パースを強化： "4,920.00" などでも 4920 として扱う
   function parseAmount(val) {
     if (val == null) return 0;
     if (typeof val === "number") return Math.floor(val);
-    const digits = String(val).replace(/[^\d]/g, "");
+
+    const raw = String(val).trim();
+    if (!raw) return 0;
+
+    // 通貨・空白除去 → 桁区切り除去
+    const cleaned = raw.replace(/[￥¥\s]/g, "").replace(/,/g, "");
+    const num = Number(cleaned);
+    if (Number.isFinite(num)) return Math.floor(num);
+
+    // それでも無理なら数字だけ
+    const digits = cleaned.replace(/[^\d]/g, "");
     return digits ? parseInt(digits, 10) : 0;
   }
 
@@ -598,6 +597,43 @@
     return null;
   }
 
+  // ★ 報酬列の選択を「以前の意図」に寄せて固定化：
+  //  1) "報酬" もしくは "報酬（円）" 等の完全一致（正規化後）を最優先
+  //  2) 次に、報酬を含むが「合計/累計/総額/税/源泉/控除/差引/企業防衛/手当」等を含まないもの
+  function pickRewardKey(sampleRow) {
+    const keys = Object.keys(sampleRow || {});
+    const entries = keys.map(k => ({ key: k, n: normalizeHeader(k) }));
+
+    const exactWanted = [
+      normalizeHeader("報酬"),
+      normalizeHeader("報酬円"),
+      normalizeHeader("報酬金額")
+    ];
+
+    for (const want of exactWanted) {
+      const hit = entries.find(e => e.n === want);
+      if (hit) return hit.key;
+    }
+
+    const badTokens = [
+      "合計","累計","総額","税","源泉","控除","差引","企業防衛","手当","調整","立替","保全"
+    ].map(normalizeHeader);
+
+    const candidates = entries
+      .filter(e => e.n.includes(normalizeHeader("報酬")))
+      .filter(e => badTokens.every(bt => !e.n.includes(bt)))
+      .sort((a,b) => a.n.length - b.n.length); // 一番短い＝最も素朴な「報酬」に近い
+
+    if (candidates.length) return candidates[0].key;
+
+    // 最終フォールバック（従来互換）
+    return (
+      findColumnKey(sampleRow, ["報酬"], ["企業防衛"]) ||
+      findColumnKey(sampleRow, "報酬") ||
+      "報酬"
+    );
+  }
+
   function normalizeNyukin(val) {
     if (val == null) return "";
     let s = String(val);
@@ -608,7 +644,6 @@
 
   function parseYearMonthFromFilename(fileName) {
     if (!fileName) return null;
-    // 9998974_202512.xlsx / _YYYYMM / 末尾YYYYMM などを許容
     let match = fileName.match(/_(\d{6})(?=\.(xlsx|xls)$)/i);
     if (!match) match = fileName.match(/(\d{6})(?=\.(xlsx|xls)$)/i);
     if (!match) return null;
@@ -714,7 +749,6 @@
 
       setStatus("");
 
-      // PDF保存時のファイル名候補（Chrome等ではタイトルが初期値になりやすい）
       const originalTitle = document.title;
       const yearVal = yearInput.value.trim();
       const monthVal = monthInput.value.trim();
@@ -734,7 +768,6 @@
     runBtn.addEventListener("click", () => {
       const file = fileInput.files[0];
 
-      // 表示クリア
       summaryEl.textContent = "";
       tbodyEl.innerHTML = "";
       tableWrapperEl.style.display = "none";
@@ -743,14 +776,12 @@
 
       if (!file) { setStatus("xlsx ファイルを選択してください。", true); return; }
 
-      // 対象年月はファイル名から必須取得（入力不可）
       const ym = updateYearMonthUI(file.name);
       if (!ym) {
         setStatus("対象年月をファイル名から取得できません。ファイル名を「9998974_YYYYMM.xlsx」の形式にしてください。", true);
         return;
       }
 
-      // 料率
       const ratePct = parseFloat(rateInput.value);
       if (!Number.isFinite(ratePct) || ratePct < 0 || ratePct > 100) {
         setStatus("料率（%）は 0〜100 の範囲で入力してください。", true);
@@ -758,7 +789,6 @@
       }
       const rate = ratePct / 100;
 
-      // 集計→チェック→印刷の導線（集計したらチェックはやり直し）
       manualCheck.checked = false;
       confirmedGen = 0;
 
@@ -790,12 +820,13 @@
           const seisekiKey  = findColumnKey(sampleRow, "成績") || "成績";
           const nyukinKey   = findColumnKey(sampleRow, "入金回数") || "入金回数";
 
-          // 報酬列：一般的には「報酬（円）」等。念のため「企業防衛推進手当」は除外。
-          const rewardKey =
-            findColumnKey(sampleRow, ["報酬"], ["企業防衛"]) ||
-            findColumnKey(sampleRow, "報酬") || "報酬";
+          // ★ 修正：報酬列の選択を厳格化
+          const rewardKey   = pickRewardKey(sampleRow);
+          if (!rewardKey || !(rewardKey in sampleRow)) {
+            setStatus("報酬列を特定できませんでした。ヘッダーに「報酬」列が存在するか確認してください。", true);
+            return;
+          }
 
-          // 抽出
           const rows = [];
           for (const row of json) {
             const seiseki   = String(row[seisekiKey] || "");
@@ -811,21 +842,20 @@
             rows.push({ contractor: contractorName, seiseki, nyukin: nyukinRaw, firstReward, bonus });
           }
 
-          // レポートヘッダ更新（印刷時にファイル名明示）
           updateReportHead({ year: ym.year, month: ym.month, ratePct, fileName: file.name });
 
-          // 集計・表示
           hasAggregated = true;
           aggregateGen += 1;
+
+          const colInfo = `判定列：契約者名「${contractKey}」/ 成績「${seisekiKey}」/ 入金回数「${nyukinKey}」/ 報酬「${rewardKey}」`;
 
           if (!rows.length) {
             tableWrapperEl.style.display = "none";
             noMatchBox.style.display = "block";
             summaryEl.innerHTML =
-              `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当（料率 ${ratePct}%）：</span>` +
-              `該当無し`;
+              `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当（料率 ${ratePct}%）：</span>該当無し`;
 
-            setStatus("集計が完了しました（該当無し）。STEP3 で「目視確認済み」にチェックを入れると、STEP4 で PDF/印刷が可能です。");
+            setStatus(`集計が完了しました（該当無し）。${colInfo}。STEP3 で「目視確認済み」にチェック→STEP4でPDF/印刷が可能です。`);
             return;
           }
 
@@ -925,7 +955,7 @@
             `<span class="highlight">${ym.year}年${ym.month}月分企業防衛推進手当 合計（料率 ${ratePct}%）：</span>` +
             `${totalBonus.toLocaleString("ja-JP")}円`;
 
-          setStatus("集計が完了しました。STEP3 で内容を目視確認し、「目視確認済み」にチェックを入れてから、STEP4 で PDF/印刷を行ってください。");
+          setStatus(`集計が完了しました。${colInfo}。STEP3で目視確認→チェック→STEP4でPDF/印刷を行ってください。`);
 
         } catch (err) {
           console.error(err);
@@ -943,7 +973,6 @@
       reader.readAsArrayBuffer(file);
     });
 
-    // 初期状態
     setStatus("");
     syncActiveChip();
     updateFileInfo();
